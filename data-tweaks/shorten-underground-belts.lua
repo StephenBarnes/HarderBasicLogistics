@@ -44,8 +44,25 @@ function shortenAllUndergroundsTo1()
 	end
 end
 
-function shortenAllUndergroundsIncremental()
+function findLowestTierTransportBelt()
 	local currentBelt = data.raw["transport-belt"]["transport-belt"]
+	local anotherRound = true
+	while anotherRound do
+		-- look through transport belts for something that upgrades to current belt
+		anotherRound = false
+		for _, belt in pairs(data.raw["transport-belt"]) do
+			if belt.next_upgrade == currentBelt.name then
+				currentBelt = belt
+				anotherRound = true
+				break
+			end
+		end
+	end
+	return currentBelt
+end
+
+function shortenAllUndergroundsIncremental()
+	local currentBelt = findLowestTierTransportBelt()
 	local currentBeltLen = 2
 	while true do
 		adjustUndergroundFor(currentBelt, currentBeltLen)
