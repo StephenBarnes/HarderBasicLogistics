@@ -13,3 +13,5 @@ end
 if settings.startup["HarderLogistics-belt-speed-multiplier"].value ~= 1.0 then
 	require("dff-multiply-belt-speeds")
 end
+
+-- TODO give the mod a better name

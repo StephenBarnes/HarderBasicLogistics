@@ -7,6 +7,7 @@ local longInserters = {
 	["long-handed-steam-inserter"] = true,
 
 	-- TODO add more
+	-- TODO change this to rather use a regex match for "long-handed" and "long-inserter" inside data.raw.inserter.
 }
 
 function hideRecipe(s)
