@@ -1,14 +1,7 @@
-
-local longInserters = {
-	-- vanilla
-	["long-handed-inserter"] = true,
-
-	-- Industrial Revolution 3
-	["long-handed-steam-inserter"] = true,
-
-	-- TODO add more
-	-- TODO change this to rather use a regex match for "long-handed" and "long-inserter" inside data.raw.inserter.
-}
+function recipeNameIsLongInserter(recipeName)
+	return ((string.find(recipeName, "long%-inserter") ~= nil)
+		or ((string.find(recipeName, "long%-handed") ~= nil) and (string.find(recipeName, "inserter") ~= nil)))
+end
 
 function hideRecipe(s)
 	local recipe = data.raw.recipe[s]
@@ -27,7 +20,7 @@ function removeLongInserterFromTechDifficulty(techDifficulty)
 	if oldEffects == nil then return end
 	local needsChanging = false
 	for _, effect in pairs(oldEffects) do
-		if effect.type == "unlock-recipe" and longInserters[effect.recipe] then
+		if effect.type == "unlock-recipe" and recipeNameIsLongInserter(effect.recipe) then
 			needsChanging = true
 			break
 		end
@@ -35,7 +28,7 @@ function removeLongInserterFromTechDifficulty(techDifficulty)
 	if not needsChanging then return end
 	local newEffects = {}
 	for _, effect in pairs(oldEffects) do
-		if not (effect.type == "unlock-recipe" and longInserters[effect.recipe]) then
+		if not (effect.type == "unlock-recipe" and recipeNameIsLongInserter(effect.recipe)) then
 			table.insert(newEffects, effect)
 		end
 	end
@@ -53,8 +46,10 @@ end
 
 ------------------------------------------------------------------------
 
-for longInserter, _ in pairs(longInserters) do
-	hideRecipe(longInserter)
+for name, _ in pairs(data.raw.recipe) do
+	if recipeNameIsLongInserter(name) then
+		hideRecipe(name)
+	end
 end
 
 for _, tech in pairs(data.raw.technology) do

@@ -47,8 +47,6 @@ data:extend({
     },
 })
 
--- TODO add compat with bob's belts and inserters, and add optional dependency on that.
-
 -- TODO add a worldgen noise function / whatever to make it so that cliffs generate everywhere, and in maze-like patterns. Then also make cliff explosives more expensive.
--- TODO allow the player able to walk through cliffs, just not build on them.
+-- TODO maybe: allow the player able to walk through cliffs, just not build on them. Probably some collision mask change.
 -- TODO recipe multipliers for: belts, cliff explosives, landfill, undergrounds, splitters.
