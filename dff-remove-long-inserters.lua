@@ -1,8 +1,9 @@
 
 local longInserters = {
+	-- vanilla
 	["long-handed-inserter"] = true,
 
-	-- For Industrial Revolution 3
+	-- Industrial Revolution 3
 	["long-handed-steam-inserter"] = true,
 
 	-- TODO add more
@@ -11,7 +12,7 @@ local longInserters = {
 function hideRecipe(s)
 	local recipe = data.raw.recipe[s]
 	if recipe ~= nil then
-		if data.normal then -- Recipe has separate normal and expensive
+		if recipe.normal then -- Recipe has separate normal and expensive
 			recipe.normal.hidden = true
 			recipe.expensive.hidden = true
 		else
@@ -20,7 +21,7 @@ function hideRecipe(s)
 	end
 end
 
-function removeLongInserterTechEffects(techDifficulty)
+function removeLongInserterFromTechDifficulty(techDifficulty)
 	local oldEffects = techDifficulty.effects
 	if oldEffects == nil then return end
 	local needsChanging = false
@@ -40,14 +41,12 @@ function removeLongInserterTechEffects(techDifficulty)
 	techDifficulty.effects = newEffects
 end
 
-function removeLongInsertersFromTechnologies()
-	for _, tech in pairs(data.raw.technology) do
-		if tech.normal then -- Tech has separate normal and expensive
-			removeLongInserterTechEffects(tech.normal)
-			removeLongInserterTechEffects(tech.expensive)
-		else
-			removeLongInserterTechEffects(tech)
-		end
+function removeLongInserterFromTech(tech)
+	if tech.normal then -- Tech has separate normal and expensive
+		removeLongInserterFromTechDifficulty(tech.normal)
+		removeLongInserterFromTechDifficulty(tech.expensive)
+	else
+		removeLongInserterFromTechDifficulty(tech)
 	end
 end
 
@@ -56,4 +55,7 @@ end
 for longInserter, _ in pairs(longInserters) do
 	hideRecipe(longInserter)
 end
-removeLongInsertersFromTechnologies()
+
+for _, tech in pairs(data.raw.technology) do
+	removeLongInserterFromTech(tech)
+end
