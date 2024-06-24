@@ -33,6 +33,13 @@ data:extend({
     },
     {
         order = "4",
+        name = "HarderLogistics-belt-speed-multiplier",
+        type = "double-setting",
+        setting_type = "startup",
+        default_value = 0.5,
+    },
+    {
+        order = "5",
         name = "HarderLogistics-splitter-speed-multiplier",
         type = "double-setting",
         setting_type = "startup",

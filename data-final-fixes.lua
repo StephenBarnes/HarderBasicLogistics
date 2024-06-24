@@ -10,3 +10,6 @@ end
 if settings.startup["HarderLogistics-splitter-speed-multiplier"].value ~= 1.0 then
 	require("dff-multiply-splitter-speeds")
 end
+if settings.startup["HarderLogistics-belt-speed-multiplier"].value ~= 1.0 then
+	require("dff-multiply-belt-speeds")
+end
