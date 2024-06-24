@@ -10,7 +10,7 @@ local settings = {
         name = "HarderBasicLogistics-inserter-placement-blocking",
         type = "string-setting",
         setting_type = "startup",
-        default_value = "allow-all",
+        default_value = "block-cross-5-5",
         allowed_values = {
             "allow-all",
             "block-4",
