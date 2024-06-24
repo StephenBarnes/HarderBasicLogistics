@@ -1,6 +1,12 @@
-data:extend({
+local nextOrder = 0
+function getNextOrder()
+    nextOrder = nextOrder + 1
+    return string.format("%03d", nextOrder)
+end
+
+local settings = {
     {
-        order = "1",
+        order = getNextOrder(),
         name = "HarderLogistics-inserter-placement-blocking",
         type = "string-setting",
         setting_type = "startup",
@@ -13,7 +19,7 @@ data:extend({
         },
     },
     {
-        order = "2",
+        order = getNextOrder(),
         name = "HarderLogistics-shorten-underground-belts",
         type = "string-setting",
         setting_type = "startup",
@@ -25,28 +31,39 @@ data:extend({
         },
     },
     {
-        order = "3",
+        order = getNextOrder(),
         name = "HarderLogistics-remove-long-inserters",
         type = "bool-setting",
         setting_type = "startup",
         default_value = true,
     },
     {
-        order = "4",
+        order = getNextOrder(),
         name = "HarderLogistics-belt-speed-multiplier",
         type = "double-setting",
         setting_type = "startup",
         default_value = 0.5,
     },
     {
-        order = "5",
+        order = getNextOrder(),
         name = "HarderLogistics-splitter-speed-multiplier",
         type = "double-setting",
         setting_type = "startup",
         default_value = 0.5,
     },
-})
+}
 
--- TODO add a worldgen noise function / whatever to make it so that cliffs generate everywhere, and in maze-like patterns. Then also make cliff explosives more expensive.
--- TODO maybe: allow the player able to walk through cliffs, just not build on them. Probably some collision mask change.
--- TODO recipe multipliers for: belts, cliff explosives, landfill, undergrounds, splitters.
+local recipeMultipliers = require("recipe-multipliers")
+for recipeGroup, properties in pairs(recipeMultipliers) do
+    table.insert(settings, {
+        order = getNextOrder(),
+        name = "HarderLogistics-recipe-multiplier-"..recipeGroup,
+        type = "double-setting",
+        setting_type = "startup",
+        default_value = properties.default,
+    })
+end
+
+data:extend(settings)
+
+-- TODO maybe: allow the player able to walk through cliffs, just not build on them. Probably some collision mask change. This is nice because it makes it less tedious to use high cliff settings, while preserving the design challenge.
