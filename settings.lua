@@ -33,15 +33,15 @@ data:extend({
     },
     {
         order = "4",
-        name = "HarderLogistics-reduce-splitter-speeds",
-        type = "bool-setting",
+        name = "HarderLogistics-splitter-speed-multiplier",
+        type = "double-setting",
         setting_type = "startup",
-        default_value = false,
+        default_value = 0.5,
     },
 })
 
--- TODO add optional dependency on IR3, since I'm modifying its long inserter too. Also modify placement for its inserters.
 -- TODO add compat with bob's belts and inserters, and add optional dependency on that.
 
 -- TODO add a worldgen noise function / whatever to make it so that cliffs generate everywhere, and in maze-like patterns. Then also make cliff explosives more expensive.
--- TODO also make the player able to walk through cliffs, just not build on them.
+-- TODO allow the player able to walk through cliffs, just not build on them.
+-- TODO recipe multipliers for: belts, cliff explosives, landfill, undergrounds, splitters.

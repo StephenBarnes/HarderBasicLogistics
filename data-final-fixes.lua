@@ -7,6 +7,6 @@ if settings.startup["HarderLogistics-shorten-underground-belts"].value ~= "off" 
 	require("dff-shorten-underground-belts")
 end
 
-if settings.startup["HarderLogistics-reduce-splitter-speeds"].value then
-	require("dff-reduce-splitter-speeds")
+if settings.startup["HarderLogistics-splitter-speed-multiplier"].value ~= 1.0 then
+	require("dff-multiply-splitter-speeds")
 end
