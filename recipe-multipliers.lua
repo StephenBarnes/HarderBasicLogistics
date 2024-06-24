@@ -8,5 +8,5 @@ return {
     ["inserters"] = {default = 2, productCategories = {"inserter"}},
 
     ["cliff-explosives"] = {default = 4, productItems = {"cliff-explosives"}},
-    ["landfill"] = {default = 4, productItems = {"landfill"}},
+    ["landfill"] = {default = 2, productItems = {"landfill"}},
 }

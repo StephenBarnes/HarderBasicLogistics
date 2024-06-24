@@ -1,17 +1,17 @@
-require("dff-recipe-multipliers")
+require("data-tweaks.multiply-recipes")
 
 if settings.startup["HarderBasicLogistics-remove-long-inserters"].value then
-	require("dff-remove-long-inserters")
+	require("data-tweaks.remove-long-inserters")
 end
 
 -- This must go after recipe-multipliers, else recipe-multipliers will re-adjust the numbers of belts needed to make underground belts.
 if settings.startup["HarderBasicLogistics-shorten-underground-belts"].value ~= "off" then
-	require("dff-shorten-underground-belts")
+	require("data-tweaks.shorten-underground-belts")
 end
 
 if settings.startup["HarderBasicLogistics-splitter-speed-multiplier"].value ~= 1.0 then
-	require("dff-multiply-splitter-speeds")
+	require("data-tweaks.multiply-splitter-speeds")
 end
 if settings.startup["HarderBasicLogistics-belt-speed-multiplier"].value ~= 1.0 then
-	require("dff-multiply-belt-speeds")
+	require("data-tweaks.multiply-belt-speeds")
 end
