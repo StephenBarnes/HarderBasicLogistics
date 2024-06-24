@@ -1,6 +1,6 @@
 local recipeMultiplierGroups = require("recipe-multipliers")
 for groupName, group in pairs(recipeMultiplierGroups) do
-	group.value = settings.startup["HarderLogistics-recipe-multiplier-"..groupName].value
+	group.value = settings.startup["HarderBasicLogistics-recipe-multiplier-"..groupName].value
 end
 
 ------------------------------------------------------------------------

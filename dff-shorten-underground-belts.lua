@@ -58,7 +58,7 @@ end
 
 ------------------------------------------------------------------------
 
-local setting = settings.startup["HarderLogistics-shorten-underground-belts"].value
+local setting = settings.startup["HarderBasicLogistics-shorten-underground-belts"].value
 if setting == "all-1" then
 	shortenAllUndergroundsTo1()
 elseif setting == "1-then-increment" then

@@ -1,5 +1,5 @@
 
-local blockingType = settings.startup["HarderLogistics-inserter-placement-blocking"].value
+local blockingType = settings.startup["HarderBasicLogistics-inserter-placement-blocking"].value
 -- We could make this a runtime setting, not a startup setting. However, then we would need to register an event handler even when this blocking is turned off, so rather don't do that.
 
 local lastMessageTick = 0

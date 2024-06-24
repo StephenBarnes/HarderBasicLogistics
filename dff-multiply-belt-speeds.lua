@@ -7,6 +7,6 @@ local categories = {
 
 for _, c in pairs(categories) do
 	for _, b in pairs(data.raw[c]) do
-		b.speed = b.speed * settings.startup["HarderLogistics-belt-speed-multiplier"].value
+		b.speed = b.speed * settings.startup["HarderBasicLogistics-belt-speed-multiplier"].value
 	end
 end
