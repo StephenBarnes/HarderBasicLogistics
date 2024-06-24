@@ -9,7 +9,7 @@ function posEqual(p1, p2)
 	return p1.x == p2.x and p1.y == p2.y
 end
 
-function blockablePositions(pos, blockingType)
+function blockablePositions(pos)
 	if blockingType == "block-4" then
 		return {
 			{pos.x+1, pos.y},
@@ -46,8 +46,8 @@ function blockablePositions(pos, blockingType)
 	end
 end
 
-function findBlockingEntity(inserter, blockingType)
-	for _, pos in ipairs(blockablePositions(inserter.position, blockingType)) do
+function findBlockingEntity(inserter)
+	for _, pos in ipairs(blockablePositions(inserter.position)) do
 		local entities = inserter.surface.find_entities_filtered {
 			position = pos,
 			type = "inserter",
@@ -62,7 +62,7 @@ end
 
 local function maybeBlockPlayerPlacement(event)
 	local placed = event.created_entity
-	local blockedBy = findBlockingEntity(placed, blockingType)
+	local blockedBy = findBlockingEntity(placed)
 	if blockedBy == nil then return end
 
 	local player = game.get_player(event.player_index)
