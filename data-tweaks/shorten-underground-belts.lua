@@ -1,5 +1,5 @@
 
-function multiplyRecipeDifficulty(recipeDifficulty, numBelts)
+function adjustUndergroundRecipeDifficulty(recipeDifficulty, numBelts)
 	if not recipeDifficulty.ingredients then return end
 	for _, ingredient in pairs(recipeDifficulty.ingredients) do
 		-- Ingredients are in format {"iron-ore", 1} or in format {type="item", name="iron-ore", amount=1}.
@@ -18,10 +18,10 @@ end
 function adjustUndergroundRecipe(recipe, numBelts)
 	-- Adjusts the ingredients of `recipe` to require `numBelts` transport belts of that tier, if it currently requires any.
 	if recipe.normal then
-		multiplyRecipeDifficulty(recipe.normal, numBelts)
-		multiplyRecipeDifficulty(recipe.expensive, numBelts)
+		adjustUndergroundRecipeDifficulty(recipe.normal, numBelts)
+		adjustUndergroundRecipeDifficulty(recipe.expensive, numBelts)
 	else
-		multiplyRecipeDifficulty(recipe, numBelts)
+		adjustUndergroundRecipeDifficulty(recipe, numBelts)
 	end
 end
 

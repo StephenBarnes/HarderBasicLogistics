@@ -4,7 +4,7 @@ if settings.startup["HarderBasicLogistics-remove-long-inserters"].value then
 	require("data-tweaks.remove-long-inserters")
 end
 
--- This must go after recipe-multipliers, else recipe-multipliers will re-adjust the numbers of belts needed to make underground belts.
+-- This must go after multiply-recipes, else multiply-recipes will re-adjust the numbers of belts needed to make underground belts.
 if settings.startup["HarderBasicLogistics-shorten-underground-belts"].value ~= "off" then
 	require("data-tweaks.shorten-underground-belts")
 end
