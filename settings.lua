@@ -10,7 +10,7 @@ local settings = {
         name = "HarderBasicLogistics-inserter-placement-blocking",
         type = "string-setting",
         setting_type = "startup",
-        default_value = "block-perpendicular-4",
+        default_value = "block-machine-side",
         allowed_values = {
             "allow-all",
             "block-4",
@@ -19,6 +19,7 @@ local settings = {
             "block-distance-2",
             "block-perpendicular-2",
             "block-perpendicular-4",
+            "block-machine-side",
         },
     },
     {
