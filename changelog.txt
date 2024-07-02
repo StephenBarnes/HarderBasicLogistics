@@ -2,13 +2,17 @@
 Version: 1.1.0
 Date: 02. 07. 2024
   Features:
-    - TODO Add option for only 1 inserter per side of any assembling machine, furnace, etc. - need to hook into the rotation events.
-    - Add option to block the 2 or 4 tiles perpendicular to an inserter.
+    - TODO Add option for only 1 inserter per side of any assembling machine, furnace, etc.
+    - Added option to block the 2 or 4 tiles perpendicular to an inserter.
     - Added optional exception to placement rules for burner inserters.
     - Added distance-2 option for placement blocking.
     - Show flying text message when robots are blocked from placing something. (Already existed for player placements.)
+  Changes:
+    - Adjust default options to only restrict inserter placement, shorten underground belts, and remove long inserters. By default, no recipes or speeds are changed.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.0
 Date: 24. 06. 2024
   Features:
     - Initial release.
+    - Options to shorten underground belts, remove long inserters, change belt speeds, adjust recipe costs.
+    - Options to restrict inserter placement: allow all, block 4 tiles, block 8 tiles, block 5x5 cross.

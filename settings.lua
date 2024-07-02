@@ -10,7 +10,7 @@ local settings = {
         name = "HarderBasicLogistics-inserter-placement-blocking",
         type = "string-setting",
         setting_type = "startup",
-        default_value = "block-cross-5-5",
+        default_value = "block-perpendicular-4",
         allowed_values = {
             "allow-all",
             "block-4",
@@ -26,14 +26,14 @@ local settings = {
         name = "HarderBasicLogistics-placement-blocking-burner-inserters",
         type = "bool-setting",
         setting_type = "startup",
-        default_value = true,
+        default_value = false,
     },
     {
         order = getNextOrder(),
         name = "HarderBasicLogistics-shorten-underground-belts",
         type = "string-setting",
         setting_type = "startup",
-        default_value = "all-1",
+        default_value = "1-then-increment",
         allowed_values = {
             "off",
             "all-1",
@@ -52,14 +52,14 @@ local settings = {
         name = "HarderBasicLogistics-belt-speed-multiplier",
         type = "double-setting",
         setting_type = "startup",
-        default_value = 0.5,
+        default_value = 1,
     },
     {
         order = getNextOrder(),
         name = "HarderBasicLogistics-splitter-speed-multiplier",
         type = "double-setting",
         setting_type = "startup",
-        default_value = 0.5,
+        default_value = 1,
     },
 }
 
