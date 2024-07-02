@@ -94,7 +94,9 @@ for _, recipe in pairs(data.raw["recipe"]) do
 		local group = recipeMultiplierGroups[groupName]
 		if group ~= nil then
 			local multiplier = group.value
-			multiplyRecipe(recipe, multiplier)
+			if multiplier ~= 1 then
+				multiplyRecipe(recipe, multiplier)
+			end
 		end
 	end
 end
