@@ -16,6 +16,7 @@ local settings = {
             "block-4",
             "block-8",
             "block-cross-5-5",
+            "block-distance-2",
         },
     },
     {

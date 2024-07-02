@@ -41,6 +41,23 @@ function blockablePositions(pos)
 			{pos.x, pos.y+2},
 			{pos.x, pos.y-2},
 		}
+	elseif blockingType == "block-distance-2" then
+		return {
+			{pos.x+1, pos.y},
+			{pos.x-1, pos.y},
+			{pos.x, pos.y+1},
+			{pos.x, pos.y-1},
+
+			{pos.x+2, pos.y},
+			{pos.x-2, pos.y},
+			{pos.x, pos.y+2},
+			{pos.x, pos.y-2},
+
+			{pos.x+1, pos.y+1},
+			{pos.x+1, pos.y-1},
+			{pos.x-1, pos.y+1},
+			{pos.x-1, pos.y-1},
+		}
 	else
 		game.print("ERROR: Unknown inserter blocking type")
 	end
