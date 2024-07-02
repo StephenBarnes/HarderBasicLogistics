@@ -4,8 +4,8 @@ Date: 02. 07. 2024
   Features:
     - TODO Add option for only perpendicular to an inserter - need to hook into the rotation events.
     - TODO Add option for only 1 inserter per side of any assembling machine, furnace, etc. - need to hook into the rotation events.
-    - TODO add optional exception to placement rules for burner entities.
     - TODO optionally apply the placement blocking rules to 1x1 loaders too.
+    - Added optional exception to placement rules for burner inserters.
     - Added distance-2 option for placement blocking.
 ---------------------------------------------------------------------------------------------------
 Version: 1.0.0

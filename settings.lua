@@ -21,6 +21,13 @@ local settings = {
     },
     {
         order = getNextOrder(),
+        name = "HarderBasicLogistics-placement-blocking-burner-inserters",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = true,
+    },
+    {
+        order = getNextOrder(),
         name = "HarderBasicLogistics-shorten-underground-belts",
         type = "string-setting",
         setting_type = "startup",

@@ -2,14 +2,12 @@
 local blockingType = settings.startup["HarderBasicLogistics-inserter-placement-blocking"].value
 -- We could make this a runtime setting, not a startup setting. However, then we would need to register an event handler even when this blocking is turned off, so rather don't do that.
 
+local placementBlockingBurnerInserters = settings.startup["HarderBasicLogistics-placement-blocking-burner-inserters"].value
+
 local lastMessageTick = 0
 local messageWaitTicks = 15 -- Don't show message if a message was already shown within this many ticks ago.
 
-function posEqual(p1, p2)
-	return p1.x == p2.x and p1.y == p2.y
-end
-
-function blockablePositions(pos)
+local function blockablePositions(pos)
 	if blockingType == "block-4" then
 		return {
 			{pos.x+1, pos.y},
@@ -63,15 +61,24 @@ function blockablePositions(pos)
 	end
 end
 
-function findBlockingEntity(inserter)
+local function entityBlocksPlacement(entity)
+	if (not placementBlockingBurnerInserters) and entity.name == "burner-inserter" then
+		return false
+	end
+	return true
+end
+
+local function findBlockingEntity(inserter)
 	for _, pos in ipairs(blockablePositions(inserter.position)) do
 		local entities = inserter.surface.find_entities_filtered {
 			position = pos,
 			type = "inserter",
 			limit = 1,
 		}
-		if #entities > 0 then
-			return entities[1]
+		for _, entity in ipairs(entities) do
+			if entityBlocksPlacement(entity) then
+				return entity
+			end
 		end
 	end
 	return nil
@@ -110,7 +117,19 @@ local function maybeBlockRobotPlacement(event)
 		-- Force arg is to mark the spilled item stack for deconstruction by the robot's force.
 end
 
+local function getEventFilters()
+	if placementBlockingBurnerInserters then
+		return {{filter="type", type="inserter"}}
+	else
+		return {
+			{filter="type", type="inserter"},
+			{filter="name", name="burner-inserter", invert=true, mode="and"},
+		}
+	end
+end
+
 if blockingType ~= "allow-all" then
-	script.on_event(defines.events.on_built_entity, maybeBlockPlayerPlacement, {{filter="type", type="inserter"}})
-	script.on_event(defines.events.on_robot_built_entity, maybeBlockRobotPlacement, {{filter="type", type="inserter"}})
+	local eventFilters = getEventFilters()
+	script.on_event(defines.events.on_built_entity, maybeBlockPlayerPlacement, eventFilters)
+	script.on_event(defines.events.on_robot_built_entity, maybeBlockRobotPlacement, eventFilters)
 end
