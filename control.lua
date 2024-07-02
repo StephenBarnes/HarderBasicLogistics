@@ -165,6 +165,16 @@ local function maybeBlockRobotPlacement(event)
 	placed.destroy()
 	surface.spill_item_stack(pos, event.stack, nil, event.robot.force)
 		-- Force arg is to mark the spilled item stack for deconstruction by the robot's force.
+
+	if game.tick > lastMessageTick + messageWaitTicks then
+		lastMessageTick = game.tick
+		surface.create_entity {
+			name = "flying-text",
+			position = pos,
+			text = {"cant-build-reason.entity-in-the-way", {"entity-name."..blockedBy.name}},
+			time_to_live = 40,
+		}
+	end
 end
 
 local function getEventFilters()
