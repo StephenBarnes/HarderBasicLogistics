@@ -8,8 +8,8 @@ end
 function multiplyRecipeDifficulty(recipeDifficulty, multiplier)
 	if not recipeDifficulty.ingredients then return end
 	for _, ingredient in pairs(recipeDifficulty.ingredients) do
-		-- Ingredients are in format {"iron-ore", 1} or in format {type="item", name="iron-ore", amount=1}.
-		if ingredient.type ~= nil then
+		-- Ingredients are in format {"iron-ore", 1} or in format {name="iron-ore", amount=1}.
+		if ingredient.amount ~= nil then
 			ingredient.amount = math.ceil(ingredient.amount * multiplier)
 		else
 			ingredient[2] = math.ceil(ingredient[2] * multiplier)
