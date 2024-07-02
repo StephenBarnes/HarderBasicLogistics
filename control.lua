@@ -192,18 +192,9 @@ local function movePosInDir(pos, dir, dist)
 	end
 end
 
-local function sidesAndDirsTo(pos, dist)
-	-- Given a position, returns a table of direction -> position such that `pos` is in that direction at that dist.
-	local result = {}
-	for _, dir in pairs(cardinalDirections) do
-		result[dir] = movePosInDir(pos, dir, -dist)
-	end
-	return result
-end
-
 local function checkMachineSideBlocking(entity, checkDir)
 	-- Checks whether the given machine entity's placement is valid, given adjacent inserters etc.
-	-- If it's not valid, returns one entity blocking it, else returns nil.
+	-- If it's not valid, returns a list of two entities blocking it, else returns nil.
 	local sidesToCheck
 	if checkDir == nil then
 		sidesToCheck = getMachineAllEdges(entity)
@@ -212,7 +203,7 @@ local function checkMachineSideBlocking(entity, checkDir)
 	end
 	for dir, side in pairs(sidesToCheck) do
 		local blockAxis = dirAxis(dir)
-		local numBlockersOnSide = 0
+		local firstBlocker = nil
 		for _, pos in pairs(side) do
 			local blockers = entity.surface.find_entities_filtered {
 				position = {pos[1] + 0.5, pos[2] + 0.5}, -- Offset by 0.5 because it checks the center of the tile.
@@ -222,9 +213,10 @@ local function checkMachineSideBlocking(entity, checkDir)
 			for _, blocker in ipairs(blockers) do
 				if ((dirAxis(blocker.direction) == blockAxis)
 						and entityBlocksPlacement(blocker, entity)) then
-					numBlockersOnSide = numBlockersOnSide + 1
-					if numBlockersOnSide > 1 then
-						return blocker
+					if firstBlocker == nil then
+						firstBlocker = blocker
+					else
+						return {firstBlocker, blocker}
 					end
 				end
 			end
@@ -241,9 +233,10 @@ local function checkMachineSideBlocking(entity, checkDir)
 					if ((dirAxis(blocker.direction) == blockAxis)
 							and Common.isLongInserter(blocker.name)
 							and entityBlocksPlacement(blocker, entity)) then
-						numBlockersOnSide = numBlockersOnSide + 1
-						if numBlockersOnSide > 1 then
-							return blocker
+						if firstBlocker == nil then
+							firstBlocker = blocker
+						else
+							return {firstBlocker, blocker}
 						end
 					end
 				end
@@ -265,11 +258,16 @@ local function checkInserterMachineSideBlocking(entity)
 		}
 		if #blockers == 1 and machineSideBlockingAppliesToEntity(blockers[1]) then
 			local blocker = blockers[1]
-			local machineBlocker = checkMachineSideBlocking(blocker, dir)
-			if machineBlocker ~= nil then
+			local machineBlockers = checkMachineSideBlocking(blocker, dir)
+			if machineBlockers ~= nil then
 				-- We could return either `blocker` (the machine) or `machineBlocker` (the inserter).
 				-- I think let's return the machine, especially since `machineBlocker` could be the same as `entity`, which isn't helpful.
-				return blocker
+				-- There's 3 entities here: the machine, and 2 inserters. We want to return the machine, and the inserter that isn't `entity`.
+				if machineBlockers[1].name == entity.name then
+					return {blocker, machineBlockers[2]}
+				else
+					return {blocker, machineBlockers[1]}
+				end
 			end
 		end
 	end
@@ -277,12 +275,31 @@ local function checkInserterMachineSideBlocking(entity)
 end
 
 local function findBlockingEntity(entity)
+	-- If not blocked. returns nil.
+	-- If blocked, returns localised string with message to show.
 	if blockingType == "block-machine-side" then
-		if machineSideBlockingAppliesToEntity(entity) then
-			return checkMachineSideBlocking(entity)
-			-- TODO maybe show a different message in these cases.
+		if machineSideBlockingAppliesToEntity(entity) then -- Placing a machine blocked by two inserters.
+			local machineSideBlockers = checkMachineSideBlocking(entity)
+			if machineSideBlockers == nil then
+				return nil
+			else
+				if machineSideBlockers[1].name == machineSideBlockers[2].name then
+					return { "cant-build-reason.HarderBasicLogistics-2-blockers-same",
+						{ "entity-name." .. machineSideBlockers[1].name } }
+				end
+				return { "cant-build-reason.HarderBasicLogistics-2-blockers",
+					{ "entity-name." .. machineSideBlockers[1].name },
+					{ "entity-name." .. machineSideBlockers[2].name } }
+			end
 		else
-			return checkInserterMachineSideBlocking(entity)
+			local blockers = checkInserterMachineSideBlocking(entity)
+			if blockers == nil then
+				return nil
+			else
+				return { "cant-build-reason.HarderBasicLogistics-2-blockers",
+					{ "entity-name." .. blockers[1].name },
+					{ "entity-name." .. blockers[2].name } }
+			end
 		end
 	end
 	for _, pos in pairs(blockablePositions(entity)) do
@@ -293,7 +310,8 @@ local function findBlockingEntity(entity)
 		}
 		for _, blocker in ipairs(blockers) do
 			if entityBlocksPlacement(blocker, entity) then
-				return blocker
+				return { "cant-build-reason.HarderBasicLogistics-1-blocker",
+					{ "entity-name." .. blocker.name } }
 			end
 		end
 	end
@@ -311,8 +329,8 @@ end
 local function maybeBlockPlayerPlacement(event)
 	local placed = event.created_entity
 	if not blockingAppliesToEntity(placed) then return end
-	local blockedBy = findBlockingEntity(placed)
-	if blockedBy == nil then return end
+	local blockMessage = findBlockingEntity(placed)
+	if blockMessage == nil then return end
 
 	local player = game.get_player(event.player_index)
 	if player == nil then
@@ -322,7 +340,7 @@ local function maybeBlockPlayerPlacement(event)
 	if game.tick > lastMessageTick + messageWaitTicks then
 		lastMessageTick = game.tick
 		player.create_local_flying_text {
-			text = {"cant-build-reason.entity-in-the-way", {"entity-name."..blockedBy.name}},
+			text = blockMessage,
 			create_at_cursor = true,
 			time_to_live = 120,
 		}
@@ -333,8 +351,8 @@ end
 local function maybeBlockPlayerRotation(event)
 	local entity = event.entity
 	if not blockingAppliesToEntity(entity) then return end
-	local blockedBy = findBlockingEntity(entity)
-	if blockedBy == nil then return end
+	local blockMessage = findBlockingEntity(entity)
+	if blockMessage == nil then return end
 
 	local player = game.get_player(event.player_index)
 	if player == nil then
@@ -343,21 +361,21 @@ local function maybeBlockPlayerRotation(event)
 		if game.tick > lastMessageTick + messageWaitTicks then
 			lastMessageTick = game.tick
 			player.create_local_flying_text {
-				text = {"cant-build-reason.entity-in-the-way", {"entity-name."..blockedBy.name}},
+				text = blockMessage,
 				create_at_cursor = true,
 				time_to_live = 120,
 			}
 		end
 	end
-	-- Rotate it back, by flipping it.
+	-- Rotate it back.
 	entity.direction = event.previous_direction
 end
 
 local function maybeBlockRobotPlacement(event)
 	local placed = event.created_entity
 	if not blockingAppliesToEntity(placed) then return end
-	local blockedBy = findBlockingEntity(placed)
-	if blockedBy == nil then return end
+	local blockMessage = findBlockingEntity(placed)
+	if blockMessage == nil then return end
 
 	-- This event is caused by multiple situations:
 	-- The robot placed a new entity on empty land. We can just destroy it and spill the same stack used to build it.
@@ -383,7 +401,7 @@ local function maybeBlockRobotPlacement(event)
 		surface.create_entity {
 			name = "flying-text",
 			position = pos,
-			text = {"cant-build-reason.entity-in-the-way", {"entity-name."..blockedBy.name}},
+			text = blockMessage,
 			time_to_live = 40,
 		}
 	end
@@ -415,5 +433,3 @@ if blockingType ~= "allow-all" then
 		script.on_event(defines.events.on_player_rotated_entity, maybeBlockPlayerRotation) -- Doesn't support event filters.
 	end
 end
-
--- TODO check that the older settings still work.
