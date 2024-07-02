@@ -10,6 +10,17 @@ local messageWaitTicks = 5 -- Don't show message if a message was already shown 
 local machinesToBlockSides = {
 	["assembling-machine"] = true,
 	["furnace"] = true,
+	["lab"] = true,
+	["boiler"] = true,
+	["reactor"] = true,
+	["generator"] = true,
+	["ammo-turret"] = true,
+	["artillery-turret"] = true,
+	["roboport"] = true,
+
+	-- Vanilla's containers are 1x1, but player could be using larger ones from a mod like AAI Containers.
+	["logistic-container"] = true,
+	["container"] = true,
 }
 local function machineSideBlockingAppliesToEntity(entity)
 	return machinesToBlockSides[entity.type]
@@ -315,3 +326,6 @@ if blockingType ~= "allow-all" then
 		script.on_event(defines.events.on_player_rotated_entity, maybeBlockPlayerRotation) -- Doesn't support event filters.
 	end
 end
+
+-- TODO handle long inserters with the max-1-per-side restriction.
+-- TODO when placing an inserter with machine blocking mode, try only generating the list for one side of the machine, not all sides.
