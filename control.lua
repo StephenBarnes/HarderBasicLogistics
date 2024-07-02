@@ -5,7 +5,7 @@ local blockingType = settings.startup["HarderBasicLogistics-inserter-placement-b
 local placementBlockingBurnerInserters = settings.startup["HarderBasicLogistics-placement-blocking-burner-inserters"].value
 
 local lastMessageTick = 0
-local messageWaitTicks = 15 -- Don't show message if a message was already shown within this many ticks ago.
+local messageWaitTicks = 5 -- Don't show message if a message was already shown within this many ticks ago.
 
 local function blockablePositions(entity)
 	-- Returns a list of positions where entities could block placement of the given entity.
@@ -127,6 +127,34 @@ local function maybeBlockPlayerPlacement(event)
 	player.mine_entity(placed, true) -- "true" says force mining it even if player's inventory is full.
 end
 
+local function blockingAppliesToEntity(entity)
+	-- Given an arbitrary entity, returns whether it can be blocked by the placement restrictions.
+	return (entity.type == "inserter") and ((not placementBlockingBurnerInserters) or entity.name ~= "burner-inserter")
+end
+
+local function maybeBlockPlayerRotation(event)
+	local entity = event.entity
+	if not blockingAppliesToEntity(entity) then return end -- necessary because we can't use event filters for the rotation event.
+	local blockedBy = findBlockingEntity(entity)
+	if blockedBy == nil then return end
+
+	local player = game.get_player(event.player_index)
+	if player == nil then
+		log("Player is nil")
+	else
+		if game.tick > lastMessageTick + messageWaitTicks then
+			lastMessageTick = game.tick
+			player.create_local_flying_text {
+				text = {"cant-build-reason.entity-in-the-way", {"entity-name."..blockedBy.name}},
+				create_at_cursor = true,
+				time_to_live = 120,
+			}
+		end
+	end
+	-- Rotate it back, by flipping it.
+	entity.direction = event.previous_direction
+end
+
 local function maybeBlockRobotPlacement(event)
 	local placed = event.created_entity
 	local blockedBy = findBlockingEntity(placed)
@@ -140,6 +168,7 @@ local function maybeBlockRobotPlacement(event)
 end
 
 local function getEventFilters()
+	-- TODO also listen to placement of assemblers etc. if one-per-side is enabled.
 	if placementBlockingBurnerInserters then
 		return {{filter="type", type="inserter"}}
 	else
@@ -154,4 +183,7 @@ if blockingType ~= "allow-all" then
 	local eventFilters = getEventFilters()
 	script.on_event(defines.events.on_built_entity, maybeBlockPlayerPlacement, eventFilters)
 	script.on_event(defines.events.on_robot_built_entity, maybeBlockRobotPlacement, eventFilters)
+	if blockingType == "block-perpendicular-2" or blockingType == "block-perpendicular-4" then
+		script.on_event(defines.events.on_player_rotated_entity, maybeBlockPlayerRotation) -- Doesn't support event filters.
+	end
 end
