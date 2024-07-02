@@ -144,7 +144,7 @@ local function blockablePositions(entity)
 			{pos.x-1, pos.y-1},
 		}
 	else
-		game.print("ERROR: Unknown inserter blocking type")
+		log("ERROR: Unknown inserter blocking type")
 	end
 	-- Could refactor all this to loop over cardinalDirections, concatenate lists etc., but I think that's slower and less clear.
 end
@@ -188,7 +188,7 @@ local function movePosInDir(pos, dir, dist)
 	elseif dir == defines.direction.east then
 		return {pos[1]+dist, pos[2]}
 	else
-		game.print("ERROR: Unknown direction")
+		log("ERROR: Unknown direction")
 	end
 end
 

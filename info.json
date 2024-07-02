@@ -5,5 +5,5 @@
 	"author": "StephenB",
 	"factorio_version": "1.1",
 	"dependencies": ["base >= 1.1"],
-	"description": "Configurable tweaks to increase the difficulty of basic belt-and-inserter logistics. Remove long inserters, shorten underground belts, change belt speeds, adjust recipe costs, and restrict inserter placement."
+	"description": "A pack of tweaks to increase the complexity of belt-and-inserter logistics. Limit yourself to 1 inserter on each side of a machine, or remove long inserters, shorten underground belts, change belt speeds, adjust recipe costs."
 }
