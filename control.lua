@@ -260,8 +260,6 @@ local function checkInserterMachineSideBlocking(entity)
 			local blocker = blockers[1]
 			local machineBlockers = checkMachineSideBlocking(blocker, dir)
 			if machineBlockers ~= nil then
-				-- We could return either `blocker` (the machine) or `machineBlocker` (the inserter).
-				-- I think let's return the machine, especially since `machineBlocker` could be the same as `entity`, which isn't helpful.
 				-- There's 3 entities here: the machine, and 2 inserters. We want to return the machine, and the inserter that isn't `entity`.
 				if machineBlockers[1].name == entity.name then
 					return {blocker, machineBlockers[2]}
