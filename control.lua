@@ -155,7 +155,7 @@ local function dirAxis(dir)
 end
 local function posDeltaAxis(pos1, pos2)
 	-- Returns true if pos1 is up/down from pos2, false otherwise. For comparing axes for perpendicular placement restrictions.
-	return pos1.y == pos2.y
+	return pos1.x == pos2.x
 end
 
 local function entityBlocksPlacement(entity, otherEntity)
@@ -172,7 +172,7 @@ local function entityBlocksPlacement(entity, otherEntity)
 		axis2 = dirAxis(otherEntity.direction)
 		if axis1 ~= axis2 then return true end -- at least one of them must be blocking the other one.
 		-- If they're on the same axis, they might block each other.
-		return axis1 == posDeltaAxis(entity.position, otherEntity.position)
+		return axis1 ~= posDeltaAxis(entity.position, otherEntity.position)
 	end
 	return true
 end
