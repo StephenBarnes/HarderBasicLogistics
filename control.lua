@@ -73,7 +73,7 @@ local function maybeBlockPlayerPlacement(event)
 	if game.tick > lastMessageTick + messageWaitTicks then
 		lastMessageTick = game.tick
 		player.create_local_flying_text {
-			text = {"cant-build-reason.HarderBasicLogistics-entity-nearby", {"entity-name."..blockedBy.name}},
+			text = {"cant-build-reason.entity-in-the-way", {"entity-name."..blockedBy.name}},
 			create_at_cursor = true,
 			time_to_live = 120,
 		}
