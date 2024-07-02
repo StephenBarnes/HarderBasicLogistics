@@ -1,5 +1,5 @@
 local nextOrder = 0
-function getNextOrder()
+local function getNextOrder()
     nextOrder = nextOrder + 1
     return string.format("%03d", nextOrder)
 end
@@ -17,6 +17,8 @@ local settings = {
             "block-8",
             "block-cross-5-5",
             "block-distance-2",
+            "block-perpendicular-2",
+            "block-perpendicular-4",
         },
     },
     {
@@ -73,5 +75,3 @@ for recipeGroup, properties in pairs(recipeMultipliers) do
 end
 
 data:extend(settings)
-
--- TODO maybe: allow the player able to walk through cliffs, just not build on them. Probably some collision mask change. This is nice because it makes it less tedious to use high cliff settings, while preserving the design challenge.

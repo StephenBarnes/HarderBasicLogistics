@@ -7,8 +7,10 @@ local placementBlockingBurnerInserters = settings.startup["HarderBasicLogistics-
 local lastMessageTick = 0
 local messageWaitTicks = 15 -- Don't show message if a message was already shown within this many ticks ago.
 
-local function blockablePositions(pos)
-	if blockingType == "block-4" then
+local function blockablePositions(entity)
+	-- Returns a list of positions where entities could block placement of the given entity.
+	local pos = entity.position
+	if blockingType == "block-4" or blockingType == "block-perpendicular-2" then
 		return {
 			{pos.x+1, pos.y},
 			{pos.x-1, pos.y},
@@ -27,7 +29,7 @@ local function blockablePositions(pos)
 			{pos.x-1, pos.y+1},
 			{pos.x-1, pos.y-1},
 		}
-	elseif blockingType == "block-cross-5-5" then
+	elseif blockingType == "block-cross-5-5" or blockingType == "block-perpendicular-4" then
 		return {
 			{pos.x+1, pos.y},
 			{pos.x-1, pos.y},
@@ -61,22 +63,42 @@ local function blockablePositions(pos)
 	end
 end
 
-local function entityBlocksPlacement(entity)
+local function dirAxis(dir)
+	-- Returns true if dir is up/down, false if it's left/right. For comparing axes for perpendicular placement restrictions.
+	return dir == defines.direction.north or dir == defines.direction.south
+end
+local function posDeltaAxis(pos1, pos2)
+	-- Returns true if pos1 is up/down from pos2, false otherwise. For comparing axes for perpendicular placement restrictions.
+	return pos1.y == pos2.y
+end
+
+local function entityBlocksPlacement(entity, otherEntity)
+	-- Returns whether the given entity blocks the placement of the other entity.
+	-- This is only called for entities that are already known to be in one of the "blockable positions".
+	-- So this function only checks that the entity isn't exempt (because it's a burner), and then does rotation-dependent checks.
 	if (not placementBlockingBurnerInserters) and entity.name == "burner-inserter" then
 		return false
+	end
+	if blockingType == "block-perpendicular-2" or blockingType == "block-perpendicular-4" then
+		-- Get facing of each inserter.
+		axis1 = dirAxis(entity.direction)
+		axis2 = dirAxis(otherEntity.direction)
+		if axis1 ~= axis2 then return true end -- at least one of them must be blocking the other one.
+		-- If they're on the same axis, they might block each other.
+		return axis1 == posDeltaAxis(entity.position, otherEntity.position)
 	end
 	return true
 end
 
 local function findBlockingEntity(inserter)
-	for _, pos in ipairs(blockablePositions(inserter.position)) do
+	for _, pos in ipairs(blockablePositions(inserter)) do
 		local entities = inserter.surface.find_entities_filtered {
 			position = pos,
 			type = "inserter",
 			limit = 1,
 		}
 		for _, entity in ipairs(entities) do
-			if entityBlocksPlacement(entity) then
+			if entityBlocksPlacement(entity, inserter) then
 				return entity
 			end
 		end
