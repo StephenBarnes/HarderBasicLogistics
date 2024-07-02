@@ -27,7 +27,7 @@ local settings = {
         name = "HarderBasicLogistics-placement-blocking-burner-inserters",
         type = "bool-setting",
         setting_type = "startup",
-        default_value = false,
+        default_value = true,
     },
     {
         order = getNextOrder(),
