@@ -45,9 +45,9 @@ end
 
 local function blockablePositions(entity)
 	-- Returns a list of positions where entities could block placement of the given entity.
-	-- Not used for machine-side blocking, because that needs to consider separate "groups" of blocking tiles.
+	-- When using machine-side blocking, this is only used for the inserters, not the assembling machines.
 	local pos = entity.position
-	if blockingType == "block-4" or blockingType == "block-perpendicular-2" then
+	if blockingType == "block-4" or blockingType == "block-perpendicular-2" or blockingType == "block-machine-side" then
 		return {
 			{pos.x+1, pos.y},
 			{pos.x-1, pos.y},
@@ -157,7 +157,22 @@ end
 local function checkInserterMachineSideBlocking(entity)
 	-- Checks whether the given inserter's placement is blocked by a machine entity.
 	-- Returns the machine blocking it, or else nil.
-	-- TODO
+	for _, pos in pairs(blockablePositions(entity)) do
+		local blockers = entity.surface.find_entities_filtered {
+			position = pos,
+			limit = 1,
+		}
+		for _, blocker in ipairs(blockers) do
+			if machineSideBlockingAppliesToEntity(blocker) then
+				local machineBlocker = checkMachineSideBlocking(blocker)
+				if machineBlocker ~= nil then
+					-- We could return either `blocker` (the machine) or `machineBlocker` (the inserter).
+					-- I think let's return the machine, especially since `machineBlocker` could be the same as `entity`, which isn't helpful.
+					return blocker
+				end
+			end
+		end
+	end
 	return nil
 end
 
