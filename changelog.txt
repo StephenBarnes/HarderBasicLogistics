@@ -1,6 +1,14 @@
-Todos:
-- Add exception for burner entities
-- Change tooltip for when these rules block things, to sth more like "blocked by nearby inserter"
-- Add stackers (eg Deadlock IR3) to the list of stuff that excludes positions.
-- Add option for only perpendicular to an inserter - need to hook into the rotation events.
-- Add option for only 1 inserter per side of any assembling machine, furnace, etc. - need to hook into the rotation events.
+---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 02. 07. 2024
+  Features:
+    - TODO Add option for only perpendicular to an inserter - need to hook into the rotation events.
+    - TODO Add option for only 1 inserter per side of any assembling machine, furnace, etc. - need to hook into the rotation events.
+    - TODO add optional exception to placement rules for burner entities.
+    - TODO EASY: add distance-2 option for placement blocking
+    - TODO optionally apply the placement blocking rules to 1x1 loaders too.
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 24. 06. 2024
+  Features:
+    - Initial release.
