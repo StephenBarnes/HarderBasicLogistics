@@ -160,11 +160,26 @@ local function maybeBlockRobotPlacement(event)
 	local blockedBy = findBlockingEntity(placed)
 	if blockedBy == nil then return end
 
+	-- This event is caused by multiple situations:
+	-- The robot placed a new entity on empty land. We can just destroy it and spill the same stack used to build it.
+	-- The robot rotated an entity in-place. We can't rotate it back, so we need to make a new item stack and spill it.
+	-- The robot upgraded an entity (eg a burner inserter), perhaps with rotation. We can treat this the same as the placed-new-entity case, because the vanilla game already puts the replaced item in the robot's inventory. So we just destroy the placed entity and spill the stack used to upgrade it (the new item).
+	-- From testing, all these cases work fine.
+
 	local surface = placed.surface
 	local pos = placed.position
-	placed.destroy()
-	surface.spill_item_stack(pos, event.stack, nil, event.robot.force)
+
+	if event.stack ~= nil and event.stack.valid_for_read then
+		game.print(math.random().."A")
+		placed.destroy()
+		surface.spill_item_stack(pos, event.stack, nil, event.robot.force)
 		-- Force arg is to mark the spilled item stack for deconstruction by the robot's force.
+	else
+		game.print(math.random().."B")
+		local newStack = {name=placed.name, count=1}
+		placed.destroy()
+		surface.spill_item_stack(pos, newStack, nil, event.robot.force)
+	end
 
 	if game.tick > lastMessageTick + messageWaitTicks then
 		lastMessageTick = game.tick
