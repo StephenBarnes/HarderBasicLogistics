@@ -9,6 +9,8 @@ local longInsertersExist = not settings.startup["HarderBasicLogistics-remove-lon
 local lastMessageTick = 0
 local messageWaitTicks = 5 -- Don't show message if a message was already shown within this many ticks ago.
 
+local cardinalDirections = {defines.direction.north, defines.direction.south, defines.direction.west, defines.direction.east}
+
 local machinesToBlockSides = {
 	["assembling-machine"] = true,
 	["furnace"] = true,
@@ -26,6 +28,16 @@ local machinesToBlockSides = {
 }
 local function machineSideBlockingAppliesToEntity(entity)
 	return machinesToBlockSides[entity.type]
+end
+
+local function getParallelDirections(dir)
+	if dir == defines.direction.north or dir == defines.direction.south then
+		return {defines.direction.north, defines.direction.south}
+	elseif dir == defines.direction.west or dir == defines.direction.east then
+		return {defines.direction.west, defines.direction.east}
+	else
+		log("ERROR: Unknown direction: "..tostring(dir))
+	end
 end
 
 local function getAbsoluteBox(entity)
@@ -62,6 +74,8 @@ local function getMachineEdgePositions(entity, dir, absoluteBox)
 		for y = absoluteBox.left_top[2], absoluteBox.right_bottom[2] - 1 do
 			table.insert(edge, {absoluteBox.right_bottom[1], y})
 		end
+	else
+		log("ERROR: Unknown direction: "..tostring(dir))
 	end
 	return edge
 end
@@ -70,9 +84,8 @@ local function getMachineAllEdges(entity)
 	-- Given a machine entity, returns a list of 4 lists of positions, one containing the positions on each side.
 	-- Lists are in order top, bottom, left, right.
 	local absoluteBox = getAbsoluteBox(entity)
-	local dirs = {defines.direction.north, defines.direction.south, defines.direction.west, defines.direction.east}
 	local sides = {}
-	for _, dir in pairs(dirs) do
+	for _, dir in pairs(cardinalDirections) do
 		sides[dir] = getMachineEdgePositions(entity, dir, absoluteBox)
 	end
 	return sides
@@ -133,6 +146,7 @@ local function blockablePositions(entity)
 	else
 		game.print("ERROR: Unknown inserter blocking type")
 	end
+	-- Could refactor all this to loop over cardinalDirections, concatenate lists etc., but I think that's slower and less clear.
 end
 
 local function dirAxis(dir)
@@ -163,7 +177,7 @@ local function entityBlocksPlacement(entity, otherEntity)
 	return true
 end
 
-function movePosInDir(pos, dir, dist)
+local function movePosInDir(pos, dir, dist)
 	-- Returns a new position moved in the given direction.
 	if dir == defines.direction.north then
 		return {pos[1], pos[2]-dist}
@@ -176,6 +190,15 @@ function movePosInDir(pos, dir, dist)
 	else
 		game.print("ERROR: Unknown direction")
 	end
+end
+
+local function sidesAndDirsTo(pos, dist)
+	-- Given a position, returns a table of direction -> position such that `pos` is in that direction at that dist.
+	local result = {}
+	for _, dir in pairs(cardinalDirections) do
+		result[dir] = movePosInDir(pos, dir, -dist)
+	end
+	return result
 end
 
 local function checkMachineSideBlocking(entity, checkDir)
@@ -208,7 +231,7 @@ local function checkMachineSideBlocking(entity, checkDir)
 
 			-- handle long inserters
 			if longInsertersExist then
-				local posFurther = movePosInDir(pos, dir, 1) -- TODO refactor that other function to use this
+				local posFurther = movePosInDir(pos, dir, 1)
 				local longBlockers = entity.surface.find_entities_filtered {
 					position = {posFurther[1] + 0.5, posFurther[2] + 0.5}, -- Offset by 0.5 because it checks the center of the tile.
 					type = "inserter",
@@ -230,22 +253,12 @@ local function checkMachineSideBlocking(entity, checkDir)
 	return nil
 end
 
-local function sidesAndDirsTo(pos, dist)
-	-- Given a position, returns a table of direction -> position such that `pos` is in that direction at that dist.
-	return {
-		[defines.direction.south] = {pos.x, pos.y-dist},
-		[defines.direction.north] = {pos.x, pos.y+dist},
-		[defines.direction.west] = {pos.x+dist, pos.y},
-		[defines.direction.east] = {pos.x-dist, pos.y},
-	}
-end
-
 local function checkInserterMachineSideBlocking(entity)
 	-- Checks whether the given inserter's placement is blocked by a machine entity.
 	-- Returns the machine blocking it, or else nil.
 	local dist = Common.isLongInserter(entity.name) and 2 or 1
-	for dir, pos in pairs(sidesAndDirsTo(entity.position, dist)) do
-		-- TODO fix bug: this shouldn't check all directions, only the 2 parallel to inserter.
+	for _, dir in pairs(getParallelDirections(entity.direction)) do
+		local pos = movePosInDir({entity.position.x, entity.position.y}, dir, -dist)
 		local blockers = entity.surface.find_entities_filtered {
 			position = pos,
 			limit = 1,
@@ -403,4 +416,4 @@ if blockingType ~= "allow-all" then
 	end
 end
 
--- TODO handle long inserters with the max-1-per-side restriction.
+-- TODO check that the older settings still work.
