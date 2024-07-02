@@ -37,28 +37,48 @@ local function getAbsoluteBox(entity)
 	}
 end
 
-local function getMachineSidePositions(entity)
+local function getMachineEdgePositions(entity, dir, absoluteBox)
+	if absoluteBox == nil then
+		absoluteBox = getAbsoluteBox(entity)
+	end
+	edge = {}
+	if dir == defines.direction.north then
+		for x = absoluteBox.left_top[1], absoluteBox.right_bottom[1] - 1 do
+			table.insert(edge, {x, absoluteBox.left_top[2] - 1})
+		end
+	elseif dir == defines.direction.south then
+		for x = absoluteBox.left_top[1], absoluteBox.right_bottom[1] - 1 do
+			table.insert(edge, {x, absoluteBox.right_bottom[2]})
+		end
+	elseif dir == defines.direction.west then
+		for y = absoluteBox.left_top[2], absoluteBox.right_bottom[2] - 1 do
+			table.insert(edge, {absoluteBox.left_top[1] - 1, y})
+		end
+	elseif dir == defines.direction.east then
+		for y = absoluteBox.left_top[2], absoluteBox.right_bottom[2] - 1 do
+			table.insert(edge, {absoluteBox.right_bottom[1], y})
+		end
+	end
+	return edge
+end
+
+local function getMachineAllEdges(entity)
 	-- Given a machine entity, returns a list of 4 lists of positions, one containing the positions on each side.
 	-- Lists are in order top, bottom, left, right.
 	local absoluteBox = getAbsoluteBox(entity)
-	local edges = {{}, {}, {}, {}}
-	for x = absoluteBox.left_top[1], absoluteBox.right_bottom[1] - 1 do
-		table.insert(edges[1], {x, absoluteBox.left_top[2] - 1})
-		table.insert(edges[2], {x, absoluteBox.right_bottom[2]})
-	end
-	for y = absoluteBox.left_top[2], absoluteBox.right_bottom[2] - 1 do
-		table.insert(edges[3], {absoluteBox.left_top[1] - 1, y})
-		table.insert(edges[4], {absoluteBox.right_bottom[1], y})
-	end
-	return edges
+	return {
+		getMachineEdgePositions(entity, defines.direction.north, absoluteBox),
+		getMachineEdgePositions(entity, defines.direction.south, absoluteBox),
+		getMachineEdgePositions(entity, defines.direction.west, absoluteBox),
+		getMachineEdgePositions(entity, defines.direction.east, absoluteBox),
+	}
 end
-
 
 local function blockablePositions(entity)
 	-- Returns a list of positions where entities could block placement of the given entity.
 	-- When using machine-side blocking, this is only used for the inserters, not the assembling machines.
 	local pos = entity.position
-	if blockingType == "block-4" or blockingType == "block-perpendicular-2" or blockingType == "block-machine-side" then
+	if blockingType == "block-4" or blockingType == "block-perpendicular-2" then
 		return {
 			{pos.x+1, pos.y},
 			{pos.x-1, pos.y},
@@ -139,12 +159,23 @@ local function entityBlocksPlacement(entity, otherEntity)
 	return true
 end
 
-local function checkMachineSideBlocking(entity)
+local function checkMachineSideBlocking(entity, dir)
 	-- Checks whether the given machine entity's placement is valid, given adjacent inserters etc.
 	-- If it's not valid, returns one entity blocking it, else returns nil.
-	local sides = getMachineSidePositions(entity)
-	for i, side in pairs(sides) do
-		local blockAxis = (i == 1) or (i == 2) -- sides are in order top, bottom, left, right.
+	local sidesToCheck
+	if dir == nil then
+		sidesToCheck = getMachineAllEdges(entity)
+	else
+		sidesToCheck = {getMachineEdgePositions(entity, dir)}
+	end
+	for i, side in pairs(sidesToCheck) do
+		local blockAxis
+		if dir == nil then
+			blockAxis = (i == 1) or (i == 2) -- sides are in order top, bottom, left, right.
+		else
+			blockAxis = dirAxis(dir)
+		end
+
 		local numBlockersOnSide = 0
 		for _, pos in pairs(side) do
 			local blockers = entity.surface.find_entities_filtered {
@@ -165,22 +196,33 @@ local function checkMachineSideBlocking(entity)
 	return nil
 end
 
+local function sidesAndDirsTo(pos)
+	-- Given a position, returns a table of direction -> position such that `pos` is in that direction.
+	return {
+		[defines.direction.south] = {pos.x, pos.y-1},
+		[defines.direction.north] = {pos.x, pos.y+1},
+		[defines.direction.west] = {pos.x+1, pos.y},
+		[defines.direction.east] = {pos.x-1, pos.y},
+	}
+end
+
 local function checkInserterMachineSideBlocking(entity)
 	-- Checks whether the given inserter's placement is blocked by a machine entity.
 	-- Returns the machine blocking it, or else nil.
-	for _, pos in pairs(blockablePositions(entity)) do
+	for dir, pos in pairs(sidesAndDirsTo(entity.position)) do
 		local blockers = entity.surface.find_entities_filtered {
 			position = pos,
 			limit = 1,
 		}
-		for _, blocker in ipairs(blockers) do
-			if machineSideBlockingAppliesToEntity(blocker) then
-				local machineBlocker = checkMachineSideBlocking(blocker)
-				if machineBlocker ~= nil then
-					-- We could return either `blocker` (the machine) or `machineBlocker` (the inserter).
-					-- I think let's return the machine, especially since `machineBlocker` could be the same as `entity`, which isn't helpful.
-					return blocker
-				end
+		if #blockers == 1 and machineSideBlockingAppliesToEntity(blockers[1]) then
+			local blocker = blockers[1]
+			local machineBlocker = checkMachineSideBlocking(blocker, dir)
+			-- We could return either `blocker` (the machine) or `machineBlocker` (the inserter).
+			-- I think let's return the machine, especially since `machineBlocker` could be the same as `entity`, which isn't helpful.
+			if machineBlocker ~= nil then
+				-- We could return either `blocker` (the machine) or `machineBlocker` (the inserter).
+				-- I think let's return the machine, especially since `machineBlocker` could be the same as `entity`, which isn't helpful.
+				return blocker
 			end
 		end
 	end
