@@ -28,6 +28,7 @@ end
 
 local function getMachineSidePositions(entity)
 	-- Given a machine entity, returns a list of 4 lists of positions, one containing the positions on each side.
+	-- Lists are in order top, bottom, left, right.
 	local absoluteBox = getAbsoluteBox(entity)
 	local edges = {{}, {}, {}, {}}
 	for x = absoluteBox.left_top[1], absoluteBox.right_bottom[1] - 1 do
@@ -112,6 +113,7 @@ local function entityBlocksPlacement(entity, otherEntity)
 	-- Returns whether the given entity blocks the placement of the other entity.
 	-- This is only called for entities that are already known to be in one of the "blockable positions".
 	-- So this function only checks that the entity isn't exempt (because it's a burner), and then does rotation-dependent checks.
+	-- When machine-side blocking is enabled, this is only used for the inserters, and doesn't perform direction check.
 	if (not placementBlockingBurnerInserters) and entity.name == "burner-inserter" then
 		return false
 	end
@@ -130,7 +132,8 @@ local function checkMachineSideBlocking(entity)
 	-- Checks whether the given machine entity's placement is valid, given adjacent inserters etc.
 	-- If it's not valid, returns one entity blocking it, else returns nil.
 	local sides = getMachineSidePositions(entity)
-	for _, side in pairs(sides) do
+	for i, side in pairs(sides) do
+		local blockAxis = (i == 1) or (i == 2) -- sides are in order top, bottom, left, right.
 		local numBlockersOnSide = 0
 		for _, pos in pairs(side) do
 			local blockers = entity.surface.find_entities_filtered {
@@ -139,7 +142,7 @@ local function checkMachineSideBlocking(entity)
 				limit = 1,
 			}
 			for _, blocker in ipairs(blockers) do
-				if entityBlocksPlacement(blocker, entity) then
+				if (dirAxis(blocker.direction) == blockAxis) and entityBlocksPlacement(blocker, entity) then
 					numBlockersOnSide = numBlockersOnSide + 1
 					if numBlockersOnSide > 1 then
 						return blocker
@@ -162,6 +165,7 @@ local function findBlockingEntity(entity)
 	if blockingType == "block-machine-side" then
 		if machineSideBlockingAppliesToEntity(entity) then
 			return checkMachineSideBlocking(entity)
+			-- TODO maybe show a different message in these cases.
 		else
 			return checkInserterMachineSideBlocking(entity)
 		end
