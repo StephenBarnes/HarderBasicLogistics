@@ -13,7 +13,7 @@ local cardinalDirections = {defines.direction.north, defines.direction.south, de
 
 local function playBlockSound(player)
 	if settings.startup["HarderBasicLogistics-sound-on-placement-blocking"].value then
-		player.play_sound{path="hbl-buzzer"}
+		player.play_sound{path="HarderBasicLogistics-buzzer"}
 	end
 end
 

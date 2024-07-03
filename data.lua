@@ -2,7 +2,7 @@ if settings.startup["HarderBasicLogistics-sound-on-placement-blocking"].value th
 	data:extend({
 		{
 			type = "sound",
-			name = "hbl-buzzer",
+			name = "HarderBasicLogistics-buzzer",
 			filename = "__base__/sound/programmable-speaker/buzzer-1.ogg",
 		},
 	})
