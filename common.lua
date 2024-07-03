@@ -6,4 +6,9 @@ Common.isLongInserter = function(name)
 		or ((string.find(name, "long%-handed") ~= nil) and (string.find(name, "inserter") ~= nil)))
 end
 
+Common.isLoaderRegisteredAsInserter = function(name)
+	-- For the Miniloaders mod.
+	return (string.find(name, "miniloader") ~= nil)
+end
+
 return Common

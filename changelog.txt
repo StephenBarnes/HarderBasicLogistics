@@ -2,6 +2,7 @@
 Version: 1.2.0
 Date: 03. 07. 2024
   Features:
+    - Add option to change the speed of inserters.
     - Play a sound when a player is blocked from placing an entity.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.1
