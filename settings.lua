@@ -54,6 +54,13 @@ local settings = {
     },
     {
         order = getNextOrder(),
+        name = "HarderBasicLogistics-containers-are-special",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = false,
+    },
+    {
+        order = getNextOrder(),
         name = "HarderBasicLogistics-shorten-underground-belts",
         type = "string-setting",
         setting_type = "startup",

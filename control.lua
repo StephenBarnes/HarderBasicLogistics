@@ -1,7 +1,5 @@
 local Common = require("common")
 
--- TODO add option to consider all containers as special
-
 local function debugPrint(s) game.print(math.random(1000, 9999)..": "..s) end
 
 local blockingType = settings.startup["HarderBasicLogistics-inserter-placement-blocking"].value
@@ -52,6 +50,9 @@ local alwaysSpecialMachineTypes = { -- Machine types always allowed on the sides
 	["underground-belt"] = true,
 	["splitter"] = true,
 }
+if settings.startup["HarderBasicLogistics-containers-are-special"].value then
+	alwaysSpecialMachineTypes["container"] = true
+end
 
 local function playBlockSound(player)
 	if settings.startup["HarderBasicLogistics-sound-on-placement-blocking"].value then
