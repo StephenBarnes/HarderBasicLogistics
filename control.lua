@@ -1,9 +1,8 @@
 local Common = require("common")
 
 -- TODO add option to consider all containers as special
--- TODO fix bug with miniloaders being counted as multiple inserters
 
---local function debugPrint(s) game.print(math.random(1000, 9999)..": "..s) end
+local function debugPrint(s) game.print(math.random(1000, 9999)..": "..s) end
 
 local blockingType = settings.startup["HarderBasicLogistics-inserter-placement-blocking"].value
 -- We could make this a runtime setting, not a startup setting. However, then we would need to register an event handler even when this blocking is turned off, so rather don't do that.
@@ -209,6 +208,10 @@ local function entityBlocksPlacement(entity, otherEntity)
 	-- This is only called for entities that are already known to be in one of the "blockable positions".
 	-- So this function only checks that the entity isn't exempt (because it's a burner), and then does rotation-dependent checks.
 	-- When machine-side blocking is enabled, this is only used for the inserters, and doesn't perform direction check.
+	-- This function is only for non-special blocking.
+	if Common.isLoaderRegisteredAsInserter(entity.name) then
+		return false
+	end
 	if (not placementBlockingBurnerInserters) and entity.name == "burner-inserter" then
 		return false
 	end
@@ -434,17 +437,29 @@ local function getBlockingMessage(entity)
 	return getSpecialBlockingMessage(entity)
 end
 
-local function blockingAppliesToEntity(entity)
-	-- Given an arbitrary entity, returns whether it can be blocked by the placement restrictions.
+local function nonSpecialBlockingAppliesToEntity(entity)
+	-- Given an arbitrary entity, returns whether it can be blocked by the non-special placement restrictions.
+	if Common.isLoaderRegisteredAsInserter(entity.name) then
+		return false
+	elseif blockingType == "block-machine-side" and machineSideBlockingAppliesToEntity(entity) then
+		return true
+	else
+		return (entity.type == "inserter") and ((not placementBlockingBurnerInserters) or entity.name ~= "burner-inserter")
+	end
+end
+
+local function specialBlockingAppliesToEntity(entity)
+	-- Given an arbitrary entity, returns whether it can be blocked by the special placement restrictions.
 	if specialMachines ~= nil and specialLoadersInserters ~= nil and (not alwaysSpecialMachineTypes[entity.type]) then
 		if (not specialMachines[entity.name]) or specialLoadersInserters[entity.name] then
 			return true
 		end
 	end
-	if blockingType == "block-machine-side" and machineSideBlockingAppliesToEntity(entity) then
-		return true
-	end
-	return (entity.type == "inserter") and ((not placementBlockingBurnerInserters) or entity.name ~= "burner-inserter")
+	return false
+end
+
+local function blockingAppliesToEntity(entity)
+	return specialBlockingAppliesToEntity(entity) or nonSpecialBlockingAppliesToEntity(entity)
 end
 
 local function maybeBlockPlayerPlacement(event)
