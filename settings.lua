@@ -38,6 +38,22 @@ local settings = {
     },
     {
         order = getNextOrder(),
+        name = "HarderBasicLogistics-special-machines",
+        type = "string-setting",
+        setting_type = "startup",
+        default_value = "",
+        allow_blank = true,
+    },
+    {
+        order = getNextOrder(),
+        name = "HarderBasicLogistics-special-loaders-inserters",
+        type = "string-setting",
+        setting_type = "startup",
+        default_value = "",
+        allow_blank = true,
+    },
+    {
+        order = getNextOrder(),
         name = "HarderBasicLogistics-shorten-underground-belts",
         type = "string-setting",
         setting_type = "startup",

@@ -2,8 +2,9 @@
 Version: 1.2.0
 Date: 03. 07. 2024
   Features:
+    - TODO Added settings to restrict certain loaders/inserters to use with certain machines.
     - Add option to change the speed of inserters.
-    - Play a sound when a player is blocked from placing an entity.
+    - Play a sound when a player is blocked from placing an entity; added setting to turn it off.
 ---------------------------------------------------------------------------------------------------
 Version: 1.1.1
 Date: 02. 07. 2024

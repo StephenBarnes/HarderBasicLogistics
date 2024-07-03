@@ -11,6 +11,16 @@ local messageWaitTicks = 10 -- Don't show message if a message was already shown
 
 local cardinalDirections = {defines.direction.north, defines.direction.south, defines.direction.west, defines.direction.east}
 
+function splitToList(s)
+	local result = {}
+	for word in string.gmatch(s, '([^,]+)') do
+		table.insert(result, word)
+	end
+	return result
+end
+local specialMachines = splitToList(settings.startup["HarderBasicLogistics-special-machines"].value)
+local specialLoadersInserters = splitToList(settings.startup["HarderBasicLogistics-special-loaders-inserters"].value)
+
 local function playBlockSound(player)
 	if settings.startup["HarderBasicLogistics-sound-on-placement-blocking"].value then
 		player.play_sound{path="HarderBasicLogistics-buzzer"}
