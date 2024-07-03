@@ -1,5 +1,10 @@
 local Common = require("common")
 
+-- TODO add option to consider all containers as special
+-- TODO fix bug with miniloader name
+
+--local function debugPrint(s) game.print(math.random(1000, 9999)..": "..s) end
+
 local blockingType = settings.startup["HarderBasicLogistics-inserter-placement-blocking"].value
 -- We could make this a runtime setting, not a startup setting. However, then we would need to register an event handler even when this blocking is turned off, so rather don't do that.
 
@@ -11,7 +16,7 @@ local messageWaitTicks = 10 -- Don't show message if a message was already shown
 
 local cardinalDirections = {defines.direction.north, defines.direction.south, defines.direction.west, defines.direction.east}
 
-function splitToSet(s)
+local function splitToSet(s)
 	-- Given eg "A,B,C", returns {A=true, B=true, C=true}. If s is empty, returns nil (so we can check whether special machines are enabled at all).
 	local trimmedS = s:gsub("^%s*(.-)%s*$", "%1") -- trim whitespace
 	if trimmedS == "" then return nil end
@@ -235,7 +240,6 @@ local function checkMachineSideBlocking(entity, checkDir)
 			local blockers = entity.surface.find_entities_filtered {
 				position = {pos[1] + 0.5, pos[2] + 0.5}, -- Offset by 0.5 because it checks the center of the other building.
 				type = "inserter",
-				limit = 1,
 			}
 			for _, blocker in ipairs(blockers) do
 				if ((dirAxis(blocker.direction) == blockAxis)
@@ -254,7 +258,6 @@ local function checkMachineSideBlocking(entity, checkDir)
 				local longBlockers = entity.surface.find_entities_filtered {
 					position = {posFurther[1] + 0.5, posFurther[2] + 0.5}, -- Offset by 0.5 because it checks the center of the other building.
 					type = "inserter",
-					limit = 1,
 				}
 				for _, blocker in ipairs(longBlockers) do
 					if ((dirAxis(blocker.direction) == blockAxis)
@@ -281,7 +284,6 @@ local function checkInserterMachineSideBlocking(entity)
 		local pos = movePosInDir({entity.position.x, entity.position.y}, dir, -dist)
 		local blockers = entity.surface.find_entities_filtered {
 			position = pos,
-			limit = 1,
 		}
 		if #blockers == 1 and machineSideBlockingAppliesToEntity(blockers[1]) then
 			local blocker = blockers[1]
@@ -332,7 +334,6 @@ local function getNonSpecialBlockingMessage(entity)
 		local blockers = entity.surface.find_entities_filtered {
 			position = pos,
 			type = "inserter",
-			limit = 1,
 		}
 		for _, blocker in ipairs(blockers) do
 			if entityBlocksPlacement(blocker, entity) then
@@ -352,7 +353,7 @@ local function getSpecialLoaderInserterBlockingMessage(entity)
 	local dist = Common.isLongInserter(entity.name) and 2 or 1
 	for _, dir in pairs(getParallelDirections(entity.direction)) do
 		local pos = movePosInDir({entity.position.x, entity.position.y}, dir, -dist)
-		local blockers = entity.surface.find_entities_filtered { position = pos, limit = 1 }
+		local blockers = entity.surface.find_entities_filtered { position = pos }
 		for _, blocker in ipairs(blockers) do
 			if not alwaysSpecialMachineTypes[blocker.type] and (specialMachines == nil or not specialMachines[blocker.name]) then
 				return { "cant-build-reason.HarderBasicLogistics-special-loader-inserter-blocked",
@@ -370,16 +371,18 @@ local function getNonSpecialMachineBlockingMessage(entity)
 	-- If placement of the machine here would violate the special rules, returns localised string with message saying it's blocked.
 	-- Otherwise, returns nil.
 	-- "If it would violate the special rules" means that the machine would be the input/output point of a special loader/inserter.
+	if specialLoadersInserters == nil then return nil end
 	local sides = getMachineAllEdges(entity)
 	for dir, side in pairs(sides) do
+		local machineSideAxis = dirAxis(dir)
 		for _, pos in pairs(side) do
 			local blockers = entity.surface.find_entities_filtered {
 				position = {pos[1] + 0.5, pos[2] + 0.5}, -- Offset by 0.5 because it checks the center of the other building.
-				limit = 1,
+				-- Can't do limit = 1 here, because eg the AAI loader has an extra entity called aai-loader-pipe in the same position.
 			}
 			for _, blocker in pairs(blockers) do
-				if specialLoadersInserters ~= nil and specialLoadersInserters[blocker.name] then
-					if dirAxis(dir) == dirAxis(blocker.direction) then
+				if specialLoadersInserters[blocker.name] then
+					if dirAxis(blocker.direction) == machineSideAxis then
 						return { "cant-build-reason.HarderBasicLogistics-special-loader-inserter-blocked",
 							{ "entity-name." .. blocker.name },
 							{ "entity-name." .. entity.name },
@@ -513,7 +516,7 @@ local function maybeBlockRobotPlacement(event)
 	end
 end
 
-function getEventFilters()
+local function getEventFilters()
 	if specialMachines ~= nil then
 		-- We need to listen to all events, because we need to know about all non-special machines placed.
 		-- We could maybe build a complex filter list with inverted conditions: (not specialMachine1) and (not specialMachine2) etc.
