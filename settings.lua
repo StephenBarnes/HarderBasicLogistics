@@ -69,6 +69,13 @@ local settings = {
         setting_type = "startup",
         default_value = 1,
     },
+    {
+        order = getNextOrder(),
+        name = "HarderBasicLogistics-inserter-speed-multiplier",
+        type = "double-setting",
+        setting_type = "startup",
+        default_value = 1,
+    },
 }
 
 local recipeMultipliers = require("recipe-multipliers")
