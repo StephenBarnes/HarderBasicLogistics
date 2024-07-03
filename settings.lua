@@ -24,6 +24,13 @@ local settings = {
     },
     {
         order = getNextOrder(),
+        name = "HarderBasicLogistics-sound-on-placement-blocking",
+        type = "bool-setting",
+        setting_type = "startup",
+        default_value = true,
+    },
+    {
+        order = getNextOrder(),
         name = "HarderBasicLogistics-placement-blocking-burner-inserters",
         type = "bool-setting",
         setting_type = "startup",

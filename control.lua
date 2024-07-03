@@ -12,8 +12,9 @@ local messageWaitTicks = 10 -- Don't show message if a message was already shown
 local cardinalDirections = {defines.direction.north, defines.direction.south, defines.direction.west, defines.direction.east}
 
 local function playBlockSound(player)
-	player.play_sound{path="hbl-buzzer"}
-	-- TODO add setting to disable
+	if settings.startup["HarderBasicLogistics-sound-on-placement-blocking"].value then
+		player.play_sound{path="hbl-buzzer"}
+	end
 end
 
 local machinesToBlockSides = {
