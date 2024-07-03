@@ -7,9 +7,14 @@ local placementBlockingBurnerInserters = settings.startup["HarderBasicLogistics-
 local longInsertersExist = not settings.startup["HarderBasicLogistics-remove-long-inserters"].value
 
 local lastMessageTick = 0
-local messageWaitTicks = 5 -- Don't show message if a message was already shown within this many ticks ago.
+local messageWaitTicks = 10 -- Don't show message if a message was already shown within this many ticks ago.
 
 local cardinalDirections = {defines.direction.north, defines.direction.south, defines.direction.west, defines.direction.east}
+
+local function playBlockSound(player)
+	player.play_sound{path="hbl-buzzer"}
+	-- TODO add setting to disable
+end
 
 local machinesToBlockSides = {
 	["assembling-machine"] = true,
@@ -342,6 +347,7 @@ local function maybeBlockPlayerPlacement(event)
 			create_at_cursor = true,
 			time_to_live = 120,
 		}
+		playBlockSound(player)
 	end
 	player.mine_entity(placed, true) -- "true" says force mining it even if player's inventory is full.
 end
@@ -363,6 +369,7 @@ local function maybeBlockPlayerRotation(event)
 				create_at_cursor = true,
 				time_to_live = 120,
 			}
+			playBlockSound(player)
 		end
 	end
 	-- Rotate it back.
