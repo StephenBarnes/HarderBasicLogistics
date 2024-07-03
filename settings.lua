@@ -38,14 +38,6 @@ local settings = {
     },
     {
         order = getNextOrder(),
-        name = "HarderBasicLogistics-special-machines",
-        type = "string-setting",
-        setting_type = "startup",
-        default_value = "",
-        allow_blank = true,
-    },
-    {
-        order = getNextOrder(),
         name = "HarderBasicLogistics-special-loaders-inserters",
         type = "string-setting",
         setting_type = "startup",
@@ -58,6 +50,14 @@ local settings = {
         type = "bool-setting",
         setting_type = "startup",
         default_value = false,
+    },
+    {
+        order = getNextOrder(),
+        name = "HarderBasicLogistics-special-machines",
+        type = "string-setting",
+        setting_type = "startup",
+        default_value = "",
+        allow_blank = true,
     },
     {
         order = getNextOrder(),

@@ -43,8 +43,8 @@ local function splitToSet(s)
 	end
 	return result
 end
-local specialMachines = splitToSet(settings.startup["HarderBasicLogistics-special-machines"].value)
 local specialLoadersInserters = splitToSet(settings.startup["HarderBasicLogistics-special-loaders-inserters"].value)
+local specialMachines = splitToSet(settings.startup["HarderBasicLogistics-special-machines"].value) or {}
 local alwaysSpecialMachineTypes = { -- Machine types always allowed on the sides of special loaders/inserters.
 	["transport-belt"] = true,
 	["underground-belt"] = true,
@@ -376,7 +376,7 @@ local function getSpecialLoaderInserterBlockingMessage(entity)
 		local pos = movePosInDir({entity.position.x, entity.position.y}, dir, -dist)
 		local blockers = entity.surface.find_entities_filtered { position = pos }
 		for _, blocker in ipairs(blockers) do
-			if not alwaysSpecialMachineTypes[blocker.type] and (specialMachines == nil or not specialMachines[blocker.name]) then
+			if not alwaysSpecialMachineTypes[blocker.type] and (not specialMachines[blocker.name]) then
 				return { "cant-build-reason.HarderBasicLogistics-special-loader-inserter-blocked",
 					{ "entity-name." .. translateName(entity.name) },
 					{ "entity-name." .. translateName(blocker.name) },
@@ -437,7 +437,7 @@ end
 local function getSpecialBlockingMessage(entity)
 	-- If placement of entity is blocked by the special machines/inserters settings, returns localised string with message to show.
 	-- If not blocked, returns nil.
-	if specialMachines == nil then return nil end
+	if specialLoadersInserters == nil then return nil end
 	if alwaysSpecialMachineTypes[entity.type] then return nil end
 	if specialMachines[entity.name] then return nil end
 	if specialLoadersInserters ~= nil and specialLoadersInserters[entity.name] then
@@ -472,7 +472,7 @@ end
 
 local function specialBlockingAppliesToEntity(entity)
 	-- Given an arbitrary entity, returns whether it can be blocked by the special placement restrictions.
-	if specialMachines ~= nil and specialLoadersInserters ~= nil and (not alwaysSpecialMachineTypes[entity.type]) then
+	if specialLoadersInserters ~= nil and (not alwaysSpecialMachineTypes[entity.type]) then
 		if (not specialMachines[entity.name]) or specialLoadersInserters[entity.name] then
 			return true
 		end
@@ -568,7 +568,7 @@ local function maybeBlockRobotPlacement(event)
 end
 
 local function getEventFilters()
-	if specialMachines ~= nil then
+	if specialLoadersInserters ~= nil then
 		-- We need to listen to all events, because we need to know about all non-special machines placed.
 		-- We could maybe build a complex filter list with inverted conditions: (not specialMachine1) and (not specialMachine2) etc.
 		return nil
@@ -590,14 +590,14 @@ local function getEventFilters()
 	end
 end
 
-if blockingType ~= "allow-all" or specialMachines ~= nil then
+if blockingType ~= "allow-all" or specialLoadersInserters ~= nil then
 	local eventFilters = getEventFilters()
 	script.on_event(defines.events.on_built_entity, maybeBlockPlayerPlacement, eventFilters)
 	script.on_event(defines.events.on_robot_built_entity, maybeBlockRobotPlacement, eventFilters)
 	if (blockingType == "block-perpendicular-2"
 			or blockingType == "block-perpendicular-4"
 			or blockingType == "block-machine-side"
-			or specialMachines ~= nil) then
+			or specialLoadersInserters ~= nil) then
 		script.on_event(defines.events.on_player_rotated_entity, maybeBlockPlayerRotation) -- Doesn't support event filters.
 	end
 end
