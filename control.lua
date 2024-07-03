@@ -24,6 +24,9 @@ local translateNames = {
 	["filter-miniloader-inserter"] = "filter-miniloader",
 	["fast-filter-miniloader-inserter"] = "fast-filter-miniloader",
 	["express-filter-miniloader-inserter"] = "express-filter-miniloader",
+	["aai-loader-pipe"] = "aai-loader",
+	["aai-fast-loader-pipe"] = "aai-fast-loader",
+	["aai-express-loader-pipe"] = "aai-express-loader",
 }
 local function translateName(s)
 	return translateNames[s] or s
@@ -404,6 +407,24 @@ local function getNonSpecialMachineBlockingMessage(entity)
 							{ "entity-name." .. translateName(blocker.name) },
 							{ "entity-name." .. translateName(entity.name) },
 						}
+					end
+				end
+			end
+
+			-- handle long inserters
+			if longInsertersExist then
+				local posFurther = movePosInDir(pos, dir, 1)
+				local longBlockers = entity.surface.find_entities_filtered {
+					position = {posFurther[1] + 0.5, posFurther[2] + 0.5},
+				}
+				for _, longBlocker in pairs(longBlockers) do
+					if specialLoadersInserters[longBlocker.name] then
+						if dirAxis(longBlocker.direction) == machineSideAxis then
+							return { "cant-build-reason.HarderBasicLogistics-special-loader-inserter-blocked",
+								{ "entity-name." .. translateName(longBlocker.name) },
+								{ "entity-name." .. translateName(entity.name) },
+							}
+						end
 					end
 				end
 			end
