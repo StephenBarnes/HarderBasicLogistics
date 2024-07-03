@@ -1,6 +1,6 @@
 local Common = require("common")
 
-function hideRecipe(s)
+local function hideRecipe(s)
 	local recipe = data.raw.recipe[s]
 	if recipe ~= nil then
 		if recipe.normal then -- Recipe has separate normal and expensive
@@ -12,7 +12,7 @@ function hideRecipe(s)
 	end
 end
 
-function removeLongInserterFromTechDifficulty(techDifficulty)
+local function removeLongInserterFromTechDifficulty(techDifficulty)
 	local oldEffects = techDifficulty.effects
 	if oldEffects == nil then return end
 	local needsChanging = false
@@ -32,7 +32,7 @@ function removeLongInserterFromTechDifficulty(techDifficulty)
 	techDifficulty.effects = newEffects
 end
 
-function removeLongInserterFromTech(tech)
+local function removeLongInserterFromTech(tech)
 	if tech.normal then -- Tech has separate normal and expensive
 		removeLongInserterFromTechDifficulty(tech.normal)
 		removeLongInserterFromTechDifficulty(tech.expensive)
@@ -43,12 +43,13 @@ end
 
 ------------------------------------------------------------------------
 
-for name, _ in pairs(data.raw.recipe) do
-	if Common.isLongInserter(name) then
-		hideRecipe(name)
+if settings.startup["HarderBasicLogistics-remove-long-inserters"].value then
+	for name, _ in pairs(data.raw.recipe) do
+		if Common.isLongInserter(name) then
+			hideRecipe(name)
+		end
 	end
-end
-
-for _, tech in pairs(data.raw.technology) do
-	removeLongInserterFromTech(tech)
+	for _, tech in pairs(data.raw.technology) do
+		removeLongInserterFromTech(tech)
+	end
 end

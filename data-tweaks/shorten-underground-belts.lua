@@ -1,5 +1,5 @@
 
-function adjustUndergroundRecipeDifficulty(recipeDifficulty, numBelts)
+local function adjustUndergroundRecipeDifficulty(recipeDifficulty, numBelts)
 	if not recipeDifficulty.ingredients then return end
 	for _, ingredient in pairs(recipeDifficulty.ingredients) do
 		-- Ingredients are in format {"iron-ore", 1} or in format {type="item", name="iron-ore", amount=1}.
@@ -15,7 +15,7 @@ function adjustUndergroundRecipeDifficulty(recipeDifficulty, numBelts)
 	end
 end
 
-function adjustUndergroundRecipe(recipe, numBelts)
+local function adjustUndergroundRecipe(recipe, numBelts)
 	-- Adjusts the ingredients of `recipe` to require `numBelts` transport belts of that tier, if it currently requires any.
 	if recipe.normal then
 		adjustUndergroundRecipeDifficulty(recipe.normal, numBelts)
@@ -25,7 +25,7 @@ function adjustUndergroundRecipe(recipe, numBelts)
 	end
 end
 
-function adjustUndergroundFor(belt, length)
+local function adjustUndergroundFor(belt, length)
 	local underground = data.raw["underground-belt"][belt.related_underground_belt]
 	if underground == nil then
 		log("Couldn't find related underground belt: "..(belt.related_underground_belt or "nil"))
@@ -38,13 +38,13 @@ function adjustUndergroundFor(belt, length)
 	end
 end
 
-function shortenAllUndergroundsTo1()
+local function shortenAllUndergroundsTo1()
 	for _, belt in pairs(data.raw["transport-belt"]) do
 		adjustUndergroundFor(belt, 2)
 	end
 end
 
-function findLowestTierTransportBelt()
+local function findLowestTierTransportBelt()
 	local currentBelt = data.raw["transport-belt"]["transport-belt"]
 	local anotherRound = true
 	while anotherRound do
@@ -61,7 +61,7 @@ function findLowestTierTransportBelt()
 	return currentBelt
 end
 
-function shortenAllUndergroundsIncremental()
+local function shortenAllUndergroundsIncremental()
 	local currentBelt = findLowestTierTransportBelt()
 	local currentBeltLen = 2
 	while true do
@@ -80,6 +80,6 @@ if setting == "all-1" then
 	shortenAllUndergroundsTo1()
 elseif setting == "1-then-increment" then
 	shortenAllUndergroundsIncremental()
-else
+elseif setting ~= "off" then
 	log("ERROR: Unrecognized belt shortening option")
 end
