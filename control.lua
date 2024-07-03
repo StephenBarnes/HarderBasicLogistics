@@ -1,7 +1,7 @@
 local Common = require("common")
 
 -- TODO add option to consider all containers as special
--- TODO fix bug with miniloader name
+-- TODO fix bug with miniloaders being counted as multiple inserters
 
 --local function debugPrint(s) game.print(math.random(1000, 9999)..": "..s) end
 
@@ -15,6 +15,20 @@ local lastMessageTick = 0
 local messageWaitTicks = 10 -- Don't show message if a message was already shown within this many ticks ago.
 
 local cardinalDirections = {defines.direction.north, defines.direction.south, defines.direction.west, defines.direction.east}
+
+-- Some entities have different names for their localised strings vs for the entity.
+local translateNames = {
+	["chute-miniloader-inserter"] = "chute-miniloader",
+	["miniloader-inserter"] = "miniloader",
+	["fast-miniloader-inserter"] = "fast-miniloader",
+	["express-miniloader-inserter"] = "express-miniloader",
+	["filter-miniloader-inserter"] = "filter-miniloader",
+	["fast-filter-miniloader-inserter"] = "fast-filter-miniloader",
+	["express-filter-miniloader-inserter"] = "express-filter-miniloader",
+}
+local function translateName(s)
+	return translateNames[s] or s
+end
 
 local function splitToSet(s)
 	-- Given eg "A,B,C", returns {A=true, B=true, C=true}. If s is empty, returns nil (so we can check whether special machines are enabled at all).
@@ -313,11 +327,11 @@ local function getNonSpecialBlockingMessage(entity)
 			else
 				if machineSideBlockers[1].name == machineSideBlockers[2].name then
 					return { "cant-build-reason.HarderBasicLogistics-2-blockers-same",
-						{ "entity-name." .. machineSideBlockers[1].name } }
+						{ "entity-name." .. translateName(machineSideBlockers[1].name) } }
 				end
 				return { "cant-build-reason.HarderBasicLogistics-2-blockers",
-					{ "entity-name." .. machineSideBlockers[1].name },
-					{ "entity-name." .. machineSideBlockers[2].name } }
+					{ "entity-name." .. translateName(machineSideBlockers[1].name) },
+					{ "entity-name." .. translateName(machineSideBlockers[2].name) } }
 			end
 		else
 			local blockers = checkInserterMachineSideBlocking(entity)
@@ -325,8 +339,8 @@ local function getNonSpecialBlockingMessage(entity)
 				return nil
 			else
 				return { "cant-build-reason.HarderBasicLogistics-2-blockers",
-					{ "entity-name." .. blockers[1].name },
-					{ "entity-name." .. blockers[2].name } }
+					{ "entity-name." .. translateName(blockers[1].name) },
+					{ "entity-name." .. translateName(blockers[2].name) } }
 			end
 		end
 	end
@@ -338,7 +352,7 @@ local function getNonSpecialBlockingMessage(entity)
 		for _, blocker in ipairs(blockers) do
 			if entityBlocksPlacement(blocker, entity) then
 				return { "cant-build-reason.HarderBasicLogistics-1-blocker",
-					{ "entity-name." .. blocker.name } }
+					{ "entity-name." .. translateName(blocker.name) } }
 			end
 		end
 	end
@@ -357,8 +371,8 @@ local function getSpecialLoaderInserterBlockingMessage(entity)
 		for _, blocker in ipairs(blockers) do
 			if not alwaysSpecialMachineTypes[blocker.type] and (specialMachines == nil or not specialMachines[blocker.name]) then
 				return { "cant-build-reason.HarderBasicLogistics-special-loader-inserter-blocked",
-					{ "entity-name." .. entity.name },
-					{ "entity-name." .. blocker.name },
+					{ "entity-name." .. translateName(entity.name) },
+					{ "entity-name." .. translateName(blocker.name) },
 				}
 			end
 		end
@@ -384,8 +398,8 @@ local function getNonSpecialMachineBlockingMessage(entity)
 				if specialLoadersInserters[blocker.name] then
 					if dirAxis(blocker.direction) == machineSideAxis then
 						return { "cant-build-reason.HarderBasicLogistics-special-loader-inserter-blocked",
-							{ "entity-name." .. blocker.name },
-							{ "entity-name." .. entity.name },
+							{ "entity-name." .. translateName(blocker.name) },
+							{ "entity-name." .. translateName(entity.name) },
 						}
 					end
 				end
