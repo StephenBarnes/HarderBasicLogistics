@@ -92,8 +92,8 @@ end
 local function getAbsoluteBox(entity)
 	-- Given a machine entity, returns a bounding box of tile positions it occupies.
 	local pos = entity.position
-	local halfWidth = entity.prototype.tile_width / 2
-	local halfHeight = entity.prototype.tile_height / 2
+	local halfWidth = entity.tile_width / 2
+	local halfHeight = entity.tile_height / 2
 	return {
 		left_top = {pos.x-halfWidth, pos.y-halfHeight},
 		right_bottom = {pos.x+halfWidth, pos.y+halfHeight},
