@@ -130,8 +130,7 @@ local function getMachineEdgePositions(entity, dir, absoluteBox)
 end
 
 local function getMachineAllEdges(entity)
-	-- Given a machine entity, returns a list of 4 lists of positions, one containing the positions on each side.
-	-- Lists are in order top, bottom, left, right.
+	-- Given a machine entity, returns a table mapping the 4 directions to a list of positions on that side of the given entity.
 	local absoluteBox = getAbsoluteBox(entity)
 	local sides = {}
 	for _, dir in pairs(cardinalDirections) do
@@ -484,16 +483,17 @@ local function blockingAppliesToEntity(entity)
 	return specialBlockingAppliesToEntity(entity) or nonSpecialBlockingAppliesToEntity(entity)
 end
 
-local function maybeBlockPlayerPlacement(event)
-	local placed = event.created_entity
-	if not blockingAppliesToEntity(placed) then return end
-	local blockMessage = getBlockingMessage(placed)
-	if blockMessage == nil then return end
+local function maybeBlockPlayerAction(entity, player)
+	-- Checks if a player action is blocked by the placement restrictions.
+	-- If it is, creates a flying text message, plays sound, and returns true. Else returns false.
+	-- Caller is responsible for actually undoing the action.
+	if not blockingAppliesToEntity(entity) then return end
+	local blockMessage = getBlockingMessage(entity)
+	if blockMessage == nil then return false end
 
-	local player = game.get_player(event.player_index)
 	if player == nil then
 		log("Player is nil")
-		return
+		return true
 	end
 	if game.tick > lastMessageTick + messageWaitTicks then
 		lastMessageTick = game.tick
@@ -504,31 +504,31 @@ local function maybeBlockPlayerPlacement(event)
 		}
 		playBlockSound(player)
 	end
-	player.mine_entity(placed, true) -- "true" says force mining it even if player's inventory is full.
+	return true
+end
+
+local function maybeBlockPlayerPlacement(event)
+	local player = game.get_player(event.player_index)
+	if maybeBlockPlayerAction(event.created_entity, player) then
+		if player ~= nil then
+			player.mine_entity(event.created_entity, true) -- "true" says force mining it even if player's inventory is full.
+		end
+	end
+end
+
+local function maybeBlockPickerDolliesMovement(event)
+	-- For Picker Dollies. This is for movement, not rotation, which is instead handled by maybeBlockPlayerRotation.
+	local player = game.get_player(event.player_index)
+	if maybeBlockPlayerAction(event.moved_entity, player) then
+		event.moved_entity.teleport(event.start_pos)
+	end
 end
 
 local function maybeBlockPlayerRotation(event)
-	local entity = event.entity
-	if not blockingAppliesToEntity(entity) then return end
-	local blockMessage = getBlockingMessage(entity)
-	if blockMessage == nil then return end
-
 	local player = game.get_player(event.player_index)
-	if player == nil then
-		log("Player is nil")
-	else
-		if game.tick > lastMessageTick + messageWaitTicks then
-			lastMessageTick = game.tick
-			player.create_local_flying_text {
-				text = blockMessage,
-				create_at_cursor = true,
-				time_to_live = 120,
-			}
-			playBlockSound(player)
-		end
+	if maybeBlockPlayerAction(event.entity, player) then
+		event.entity.direction = event.previous_direction -- Rotate it back.
 	end
-	-- Rotate it back.
-	entity.direction = event.previous_direction
 end
 
 local function maybeBlockRobotPlacement(event)
@@ -590,6 +590,12 @@ local function getEventFilters()
 	end
 end
 
+local function registerPickerDolliesHandler()
+	if remote.interfaces["PickerDollies"] and remote.interfaces["PickerDollies"]["dolly_moved_entity_id"] then
+		script.on_event(remote.call("PickerDollies", "dolly_moved_entity_id"), maybeBlockPickerDolliesMovement)
+	end
+end
+
 if blockingType ~= "allow-all" or specialLoadersInserters ~= nil then
 	local eventFilters = getEventFilters()
 	script.on_event(defines.events.on_built_entity, maybeBlockPlayerPlacement, eventFilters)
@@ -600,4 +606,6 @@ if blockingType ~= "allow-all" or specialLoadersInserters ~= nil then
 			or specialLoadersInserters ~= nil) then
 		script.on_event(defines.events.on_player_rotated_entity, maybeBlockPlayerRotation) -- Doesn't support event filters.
 	end
+	script.on_load(registerPickerDolliesHandler)
+	script.on_init(registerPickerDolliesHandler)
 end
