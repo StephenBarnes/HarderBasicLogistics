@@ -85,7 +85,8 @@ local function getParallelDirections(dir)
 	elseif dir == defines.direction.west or dir == defines.direction.east then
 		return {defines.direction.west, defines.direction.east}
 	else
-		log("ERROR: Unknown direction: "..tostring(dir))
+		-- Occurs if the direction is diagonal, eg a curved rail.
+		return {}
 	end
 end
 
