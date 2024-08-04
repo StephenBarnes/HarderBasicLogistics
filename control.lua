@@ -466,7 +466,7 @@ local function nonSpecialBlockingAppliesToEntity(entity)
 	elseif blockingType == "block-machine-side" and machineSideBlockingAppliesToEntity(entity) then
 		return true
 	else
-		return (entity.type == "inserter") and ((not placementBlockingBurnerInserters) or entity.name ~= "burner-inserter")
+		return (entity.type == "inserter") and (placementBlockingBurnerInserters or entity.name ~= "burner-inserter")
 	end
 end
 
