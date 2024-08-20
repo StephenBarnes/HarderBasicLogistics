@@ -7,3 +7,5 @@ if settings.startup["HarderBasicLogistics-sound-on-placement-blocking"].value th
 		},
 	})
 end
+
+require("data-tweaks.shorten-underground-belts")

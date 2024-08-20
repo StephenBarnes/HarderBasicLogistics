@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.5
+Date: 20. 08. 2024
+  Bugfixes:
+    - Moved belt-shortening to data stage for compatibility with Show Max Underground Distance mod.
+---------------------------------------------------------------------------------------------------
 Version: 1.2.4
 Date: 04. 08. 2024
   Bugfixes:
