@@ -336,10 +336,10 @@ local function getNonSpecialBlockingMessage(entity)
 				return nil
 			else
 				if machineSideBlockers[1].name == machineSideBlockers[2].name then
-					return { "cant-build-reason.HarderBasicLogistics-2-blockers-same",
+					return { "cant-build-reason.HarderBasicLogistics-machineside-2-blockers-same",
 						{ "entity-name." .. translateName(machineSideBlockers[1].name) } }
 				end
-				return { "cant-build-reason.HarderBasicLogistics-2-blockers",
+				return { "cant-build-reason.HarderBasicLogistics-machineside-2-blockers",
 					{ "entity-name." .. translateName(machineSideBlockers[1].name) },
 					{ "entity-name." .. translateName(machineSideBlockers[2].name) } }
 			end
@@ -348,7 +348,7 @@ local function getNonSpecialBlockingMessage(entity)
 			if blockers == nil then
 				return nil
 			else
-				return { "cant-build-reason.HarderBasicLogistics-2-blockers",
+				return { "cant-build-reason.HarderBasicLogistics-machineside-2-blockers",
 					{ "entity-name." .. translateName(blockers[1].name) },
 					{ "entity-name." .. translateName(blockers[2].name) } }
 			end
