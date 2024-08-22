@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.6
+Date: 22. 08. 2024
+  Bugfixes:
+    - Fixed rare bug where forbidden inserter placement would sometimes be allowed next to machines built on top of ore patches.
+  Changes:
+    - TODO Special message when blocked due to max-1-per-side restriction
+---------------------------------------------------------------------------------------------------
 Version: 1.2.5
 Date: 20. 08. 2024
   Bugfixes:

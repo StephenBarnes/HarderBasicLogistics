@@ -76,6 +76,7 @@ local machinesToBlockSides = {
 	["container"] = true,
 }
 local function machineSideBlockingAppliesToEntity(entity)
+	-- Returns true if the entity is a machine with max-1-per-side restriction. Returns false for inserters and loaders.
 	return machinesToBlockSides[entity.type]
 end
 
@@ -306,15 +307,17 @@ local function checkInserterMachineSideBlocking(entity)
 		local blockers = entity.surface.find_entities_filtered {
 			position = pos,
 		}
-		if #blockers == 1 and machineSideBlockingAppliesToEntity(blockers[1]) then
-			local blocker = blockers[1]
-			local machineBlockers = checkMachineSideBlocking(blocker, dir)
-			if machineBlockers ~= nil then
-				-- There's 3 entities here: the machine, and 2 inserters. We want to return the machine, and the inserter that isn't `entity`.
-				if machineBlockers[1].name == entity.name then
-					return {blocker, machineBlockers[2]}
-				else
-					return {blocker, machineBlockers[1]}
+		-- We could find multiple blocker entities, e.g. an assembling machine and a resource tile underneath it. So check all of them.
+		for _, blocker in pairs(blockers) do
+			if machineSideBlockingAppliesToEntity(blocker) then
+				local machineBlockers = checkMachineSideBlocking(blocker, dir)
+				if machineBlockers ~= nil then
+					-- There's 3 entities here: the machine, and 2 inserters. We want to return the machine, and the inserter that isn't `entity`.
+					if machineBlockers[1].name == entity.name then
+						return {blocker, machineBlockers[2]}
+					else
+						return {blocker, machineBlockers[1]}
+					end
 				end
 			end
 		end
@@ -340,7 +343,7 @@ local function getNonSpecialBlockingMessage(entity)
 					{ "entity-name." .. translateName(machineSideBlockers[1].name) },
 					{ "entity-name." .. translateName(machineSideBlockers[2].name) } }
 			end
-		else
+		else -- Not a machine with max-1-per-side restriction. Could still be an inserter.
 			local blockers = checkInserterMachineSideBlocking(entity)
 			if blockers == nil then
 				return nil
